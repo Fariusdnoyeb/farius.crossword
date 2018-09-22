@@ -1,2 +1,2 @@
-# CrosswordMaker
-Crossword Editor
+# Crossword Editor
+A Crossword Editor in JavaFX.
