@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import crosswordfx.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import com.javafx.crossword.board.*?>
+
+<Tab text="Untitled" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="com.javafx.crossword.desktop.Controller">
+   <content>
+      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+         <children>
+            <SplitPane dividerPositions="0.6966731898238747" prefHeight="649.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <items>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                     <children>
+                        <ScrollPane layoutX="194.0" layoutY="233.0" prefHeight="647.0" prefWidth="709.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <content>
+                              <VBox prefHeight="560.0" prefWidth="560.0">
+                                 <children>
+                                    <HBox fx:id="boardCol" prefHeight="35.0" prefWidth="560.0" />
+                                    <HBox prefHeight="525.0" prefWidth="560.0">
+                                       <children>
+                                          <VBox fx:id="boardRow" prefHeight="525.0" prefWidth="35.0" />
+                                          <Board fx:id="board" prefHeight="525.0" prefWidth="525.0" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </content>
+                        </ScrollPane>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+               </items>
+            </SplitPane>
+         </children>
+      </AnchorPane>
+   </content>
+</Tab>

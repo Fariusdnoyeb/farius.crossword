@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.input.*?>
+<?import crosswordfx.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import main.javafx.board.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.editor.fx.controllers.MainController">
+   <children>
+      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <MenuBar VBox.vgrow="NEVER">
+               <menus>
+                  <Menu text="File">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#new15" text="New 15x15" />
+                        <MenuItem onAction="#newBoard" text="New...">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem onAction="#loadTemplate" text="Load Template..." />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAsTemplate" text="Save as Template" />
+                        <MenuItem text="Exit." />
+                     </items>
+                  </Menu>
+                  <Menu text="Edit">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#closeSelectedTab" text="Close Tab">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="W" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                        <MenuItem fx:id="clearMenuItem" onAction="#clearBoard" text="Clear Board" />
+                        <MenuItem fx:id="addWordMenuItem" text="Add Word..." />
+                     </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Help">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="About" />
+                     </items>
+                  </Menu>
+               </menus>
+            </MenuBar>
+            <ToolBar prefHeight="30.0" prefWidth="1024.0">
+              <items>
+                  <HBox alignment="CENTER" spacing="10.0">
+                     <children>
+                      <Button fx:id="testButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="426.0" text="Test" />
+                        <HBox alignment="CENTER" spacing="3.0">
+                           <children>
+                              <Label layoutX="63.0" layoutY="138.0" text="Function:" />
+                              <RadioButton layoutX="112.0" layoutY="138.0" mnemonicParsing="false" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </HBox>
+              </items>
+            </ToolBar>
+            <TabPane fx:id="tabPane" prefHeight="683.0" prefWidth="1024.0" styleClass="STYLE_CLASS_FLOATING" tabClosingPolicy="ALL_TABS" VBox.vgrow="ALWAYS" />
+            <AnchorPane prefHeight="40.0" prefWidth="1024.0" VBox.vgrow="NEVER">
+               <children>
+                  <SplitPane dividerPositions="0.2515" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <items>
+                        <AnchorPane fx:id="coordinateStatus" prefHeight="31.0" prefWidth="431.0">
+                           <children>
+                              <HBox fx:id="boardCursorStatus" alignment="CENTER_LEFT" disable="true" prefHeight="100.0" prefWidth="200.0" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <Label minWidth="-Infinity" text="Row:" />
+                                    <Label fx:id="currentRow" minWidth="-Infinity" text="000" />
+                                    <Separator minWidth="-Infinity" orientation="VERTICAL" prefHeight="200.0" />
+                                    <Label minWidth="-Infinity" text="Col:" />
+                                    <Label fx:id="currentCol" minWidth="-Infinity" text="000" />
+                                    <Separator minWidth="-Infinity" orientation="VERTICAL" prefHeight="200.0" />
+                                    <Label minWidth="-Infinity" text="Word:" />
+                                    <Label fx:id="currentWord" minWidth="-Infinity" prefHeight="17.0" prefWidth="97.0" wrapText="true" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <Label fx:id="infoBar" layoutX="71.0" layoutY="7.0" prefHeight="31.0" prefWidth="751.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children></AnchorPane>
+                     </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

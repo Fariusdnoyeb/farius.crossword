@@ -1,2 +1,2 @@
-# farius.crossword
-JavaFX Crossword Editor Application.
+# CrosswordMaker
+Crossword Editor
