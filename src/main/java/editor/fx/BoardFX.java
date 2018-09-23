@@ -76,44 +76,26 @@ public class BoardFX extends GridPane {
 // ----------------------------Key Event----------------------------
 	private void addKeyHandler() {
 		this.setOnKeyPressed(e -> {
+			if (e.isControlDown() || e.isShiftDown()) {
+				return; //need implementation
+			}
 			String c = e.getText();
 			KeyCode code = e.getCode();
 
 			if (!this.lastFocused[0].isBlack() && (code.isLetterKey() || code.isDigitKey())) {
-				switch (Editor.mode) {
-				case EDIT:
-					if (!this.multiselectedGrids.isEmpty())
-						Editor.deSelect(this);
-					this.lastFocused[0].setText(c); // EDIT vs PREVIEW mode???
-					moveToNextGrid();
-					break;
-				case PREVIEW:
-					traverseWord();
-					break;
-				}
+				if (!this.multiselectedGrids.isEmpty())
+					Editor.deSelect(this);
+				this.lastFocused[0].setText(c); // EDIT vs PREVIEW mode???
+				moveToNextGrid();
 			} else if (code.isWhitespaceKey()) {
 				if (!this.multiselectedGrids.isEmpty())
 					Editor.deSelect(this);
-				switch (Editor.mode) {
-				case EDIT:
-					moveToNextGrid();
-					break;
-				case PREVIEW:
-					traverseWord();
-					break;
-				}
+				moveToNextGrid();
 			} else if (code.isArrowKey()) {
 				if (!this.multiselectedGrids.isEmpty())
 					Editor.deSelect(this);
-				switch (Editor.mode) {
-				case EDIT:
-					navigate(code);
-					break;
-				case PREVIEW:
-					moveGrid(code);
-					break;
-				}
-			} else if (Editor.mode == Mode.EDIT && (code == KeyCode.DELETE || code == KeyCode.BACK_SPACE)) {
+				navigate(code);
+			} else if (code == KeyCode.DELETE || code == KeyCode.BACK_SPACE) {
 				if (!this.multiselectedGrids.isEmpty()) {
 					for (GridFX g : this.multiselectedGrids) {
 						g.setText('\0');
@@ -123,6 +105,7 @@ public class BoardFX extends GridPane {
 			}
 
 		});
+		
 	}
 
 	protected void changeHighlightOrien() {
@@ -181,6 +164,36 @@ public class BoardFX extends GridPane {
 		}
 	}
 
+	protected void moveToNextGrid() {
+		if (this.lastFocused[1] == null) {
+			return;
+		}
+		GridFX lastFocused = this.lastFocused[1];
+		GridFX nowFocused = this.lastFocused[0];
+		boolean isNext;
+
+		int lastCol = lastFocused.grid.getGridCol();
+		int lastRow = lastFocused.grid.getGridRow();
+		int nowCol = nowFocused.grid.getGridCol();
+		int nowRow = nowFocused.grid.getGridRow();
+
+		isNext = nowCol == lastCol + 1 && nowCol + 1 < this.board.getColSize() && nowRow == lastRow
+				&& !this.getGridFX(nowRow, nowCol + 1).isBlack();
+		if (isNext) {
+			Editor.focus(this.getGridFX(nowRow, nowCol + 1));
+			return;
+		}
+
+		isNext = nowRow == lastRow + 1 && nowRow + 1 < this.board.getRowSize() && nowCol == lastCol
+				&& !this.getGridFX(nowRow + 1, nowCol).isBlack();
+		if (isNext) {
+			Editor.focus(this.getGridFX(nowRow + 1, nowCol));
+			;
+			return;
+		}
+
+	}
+//-----------------------------------------------------------
 	private void moveGrid(KeyCode code) {
 		GridFX nowFocused = this.lastFocused[0];
 		Word word = null;
@@ -256,7 +269,7 @@ public class BoardFX extends GridPane {
 		}
 
 	}
-
+	
 	private void traverseWord() {
 		GridFX lastFocused = this.lastFocused[0];
 		Word word = null;
@@ -285,36 +298,4 @@ public class BoardFX extends GridPane {
 			moveToNextGrid();
 		}
 	}
-
-	protected void moveToNextGrid() {
-		if (this.lastFocused[1] == null) {
-			return;
-		}
-		GridFX lastFocused = this.lastFocused[1];
-		GridFX nowFocused = this.lastFocused[0];
-		boolean isNext;
-
-		int lastCol = lastFocused.grid.getGridCol();
-		int lastRow = lastFocused.grid.getGridRow();
-		int nowCol = nowFocused.grid.getGridCol();
-		int nowRow = nowFocused.grid.getGridRow();
-
-		isNext = nowCol == lastCol + 1 && nowCol + 1 < this.board.getColSize() && nowRow == lastRow
-				&& !this.getGridFX(nowRow, nowCol + 1).isBlack();
-		if (isNext) {
-			Editor.focus(this.getGridFX(nowRow, nowCol + 1));
-			return;
-		}
-
-		isNext = nowRow == lastRow + 1 && nowRow + 1 < this.board.getRowSize() && nowCol == lastCol
-				&& !this.getGridFX(nowRow + 1, nowCol).isBlack();
-		if (isNext) {
-			Editor.focus(this.getGridFX(nowRow + 1, nowCol));
-			;
-			return;
-		}
-
-	}
-//-----------------------------------------------------------
-
 }

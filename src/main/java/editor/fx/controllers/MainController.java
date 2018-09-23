@@ -1,5 +1,7 @@
 package main.java.editor.fx.controllers;
 
+import java.util.concurrent.ExecutionException;
+
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -8,7 +10,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
@@ -20,19 +21,26 @@ import main.java.editor.fx.BoardTab;
 import main.java.editor.fx.BoardTabContent;
 import main.java.editor.fx.Editor;
 import main.java.editor.fx.GridFX;
+import main.java.editor.fx.InputHandler;
+import main.java.editor.fx.UserInput;
+import main.java.editor.fx.UserInputMode;
 
 public class MainController {
 	
 	@FXML TabPane tabPane;
 	BoardTab selectedTab;
 	
-	@FXML MenuItem clearMenuItem;
-	@FXML MenuItem addWordMenuItem;
+	@FXML MenuItem closeTabMI;
+	@FXML MenuItem clearBoardMI;
+	@FXML MenuItem setClueNumberMI;
+	@FXML MenuItem removeClueNumberMI;
+	@FXML MenuItem addWordMI;
 	
 	@FXML HBox boardCursorStatus;
 	@FXML Label currentRow, currentCol, currentWord;
 	@FXML Label infoBar;
-	@FXML Button testButton;
+	
+	@FXML UserInput userInput;
 	
 	private final BooleanProperty noTab = new SimpleBooleanProperty(true);
 
@@ -52,8 +60,11 @@ public class MainController {
 		});
 
 		boardCursorStatus.disableProperty().bind(noTab);
-		clearMenuItem.disableProperty().bind(noTab);
-		addWordMenuItem.disableProperty().bind(noTab);
+		
+		closeTabMI.disableProperty().bind(noTab);
+		clearBoardMI.disableProperty().bind(noTab);
+		setClueNumberMI.disableProperty().bind(noTab);
+		addWordMI.disableProperty().bind(noTab);
 		
 		tabPane.getSelectionModel().selectedItemProperty().addListener((c, oldTab, newTab) -> {
 			if (newTab != null) {
@@ -77,6 +88,7 @@ public class MainController {
 //		addMouseEventEnterAndExit(testButton, "test button: mouse happens");
 		
 		infoBar.textProperty().bind(Editor.getInfoProperty());
+		
 	}
 	
 	private void addMouseEventEnterAndExit(Node node, String infoMessage) {
@@ -110,6 +122,22 @@ public class MainController {
 	
 	@FXML private void clearBoard() {
 		Editor.clearBoard(selectedTab.getTabContent().getBoardFX());
+	}
+	
+	@FXML private void setClueNumber() throws InterruptedException, ExecutionException {
+		
+		GridFX focus = selectedTab.getTabContent().getBoardFX().getFocusedGrid();
+
+		InputHandler<String> inputHandler = (input) -> {
+			Editor.setClueNumber(focus, Integer.parseInt(input));
+			focus.requestFocus();
+		};
+		userInput.performAction(UserInputMode.NUMBER, inputHandler);
+		
+	}
+	
+	@FXML private void removeClueNumber() {
+		Editor.removeClueNumberIfAny(selectedTab.getTabContent().getBoardFX().getFocusedGrid());
 	}
 	
 	@FXML private void new15() {

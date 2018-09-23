@@ -8,7 +8,6 @@ import javafx.scene.input.KeyCodeCombination;
 
 public class GridContextMenu extends ContextMenu{
 	private MenuItem blacken;
-	private MenuItem setClueNumber;
 	private MenuItem restore;
 	
 	BoardFX boardFX;
@@ -20,13 +19,10 @@ public class GridContextMenu extends ContextMenu{
 		blacken = new MenuItem();
 		blacken.setOnAction(e -> blacken());
 		
-		setClueNumber = new MenuItem();
-		setClueNumber.setOnAction(e -> setClueNumber());
-		
 		restore = new MenuItem("Restore");
 		restore.setOnAction(e -> restore());
 		
-		this.getItems().addAll(blacken, setClueNumber, restore);
+		this.getItems().addAll(blacken, restore);
 	}
 
 	protected void relabel() {
@@ -34,12 +30,6 @@ public class GridContextMenu extends ContextMenu{
 			blacken.setText("Unblacken");
 		} else {
 			blacken.setText("Blacken");
-		}
-		
-		if (boardFX.lastFocused[0].getChildren().size() == 3) {
-			setClueNumber.setText("Remove Clue Number");
-		} else {
-			setClueNumber.setText("SetClueNumber...");
 		}
 	}
 	private void blacken() {
@@ -49,10 +39,6 @@ public class GridContextMenu extends ContextMenu{
 		} else {
 			Editor.unblackenSelectedGrids(boardFX);
 		}
-	}
-	
-	private void setClueNumber() {
-		
 	}
 	
 	private void restore() {

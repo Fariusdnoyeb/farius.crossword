@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.input.*?>
-<?import crosswordfx.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-<?import main.javafx.board.*?>
+<?import main.java.editor.fx.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.editor.fx.controllers.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1066.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.editor.fx.controllers.MainController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -28,13 +29,23 @@
                   </Menu>
                   <Menu text="Edit">
                      <items>
-                        <MenuItem mnemonicParsing="false" onAction="#closeSelectedTab" text="Close Tab">
+                        <MenuItem fx:id="closeTabMI" mnemonicParsing="false" onAction="#closeSelectedTab" text="Close Tab">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="W" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator>
                         </MenuItem>
-                        <MenuItem fx:id="clearMenuItem" onAction="#clearBoard" text="Clear Board" />
-                        <MenuItem fx:id="addWordMenuItem" text="Add Word..." />
+                        <MenuItem fx:id="clearBoardMI" onAction="#clearBoard" text="Clear Board" />
+                        <MenuItem fx:id="setClueNumberMI" mnemonicParsing="false" onAction="#setClueNumber" text="Set Clue Number...">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                        <MenuItem fx:id="removeClueNumberMI" mnemonicParsing="false" onAction="#removeClueNumber" text="Remove Clue Number (If Any)">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                        <MenuItem fx:id="addWordMI" text="Add Word..." />
                      </items>
                   </Menu>
                   <Menu mnemonicParsing="false" text="Help">
@@ -44,25 +55,36 @@
                   </Menu>
                </menus>
             </MenuBar>
-            <ToolBar prefHeight="30.0" prefWidth="1024.0">
-              <items>
-                  <HBox alignment="CENTER" spacing="10.0">
+            <HBox alignment="CENTER_LEFT" minHeight="30.0" prefHeight="30.0" spacing="5.0" VBox.vgrow="NEVER">
+               <children>
+                  <HBox alignment="CENTER" spacing="3.0">
                      <children>
-                      <Button fx:id="testButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="426.0" text="Test" />
-                        <HBox alignment="CENTER" spacing="3.0">
-                           <children>
-                              <Label layoutX="63.0" layoutY="138.0" text="Function:" />
-                              <RadioButton layoutX="112.0" layoutY="138.0" mnemonicParsing="false" />
-                           </children>
-                        </HBox>
+                        <Label layoutX="63.0" layoutY="138.0" text="Function:" />
+                        <RadioButton layoutX="112.0" layoutY="138.0" mnemonicParsing="false" />
                      </children>
                   </HBox>
-              </items>
-            </ToolBar>
-            <TabPane fx:id="tabPane" prefHeight="683.0" prefWidth="1024.0" styleClass="STYLE_CLASS_FLOATING" tabClosingPolicy="ALL_TABS" VBox.vgrow="ALWAYS" />
-            <AnchorPane prefHeight="40.0" prefWidth="1024.0" VBox.vgrow="NEVER">
+                  <Button mnemonicParsing="false" text="Button" />
+                  <Button mnemonicParsing="false" text="Button" />
+               </children>
+               <padding>
+                  <Insets left="5.0" right="5.0" />
+               </padding>
+            </HBox>
+            <Separator prefWidth="200.0" />
+            <HBox alignment="CENTER_LEFT" minHeight="30.0" prefHeight="30.0" VBox.vgrow="NEVER">
                <children>
-                  <SplitPane dividerPositions="0.2515" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <Label prefHeight="30.0" prefWidth="35.0" text="Input:" HBox.hgrow="NEVER" />
+                  <UserInput fx:id="userInput" />
+                  <Separator orientation="VERTICAL" prefHeight="200.0" />
+               </children>
+               <padding>
+                  <Insets left="5.0" right="5.0" />
+               </padding>
+            </HBox>
+            <TabPane fx:id="tabPane" focusTraversable="false" prefWidth="1024.0" styleClass="STYLE_CLASS_FLOATING" tabClosingPolicy="ALL_TABS" VBox.vgrow="ALWAYS" />
+            <AnchorPane minHeight="30.0" prefHeight="30.0" prefWidth="1024.0" VBox.vgrow="NEVER">
+               <children>
+                  <SplitPane dividerPositions="0.2515" layoutY="-9.0" prefHeight="35.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <items>
                         <AnchorPane fx:id="coordinateStatus" prefHeight="31.0" prefWidth="431.0">
                            <children>

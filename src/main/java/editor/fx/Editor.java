@@ -29,8 +29,6 @@ public class Editor {
 	
 	private static Stop[] stops = new Stop[] { new Stop(0, Color.WHITE), new Stop(1, Color.ORANGE) };
 	private static LinearGradient lg = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, stops);
-	
-	protected static Mode mode = Mode.EDIT;
 
 	protected static final String DEFAULT_INFO = "";
 	protected static final StringProperty info = new SimpleStringProperty("");
@@ -122,7 +120,7 @@ public class Editor {
 			}
 			Editor.deSelect(boardFX);
 		} else {
-			Editor.restore(boardFX.lastFocused[0]);
+			Editor.restore(boardFX.getFocusedGrid());
 		}
 	}
 //---------------------------------------------------------
@@ -145,7 +143,7 @@ public class Editor {
 			}
 			Editor.deSelect(boardFX);
 		} else {
-			Editor.blacken(boardFX.lastFocused[0]);
+			Editor.blacken(boardFX.getFocusedGrid());
 		}
 	}
 
@@ -156,7 +154,7 @@ public class Editor {
 			}
 			Editor.deSelect(boardFX);
 		} else {
-			Editor.unblacken(boardFX.lastFocused[0]);
+			Editor.unblacken(boardFX.getFocusedGrid());
 		}
 	}
 //---------------------------------------------------------		
@@ -243,10 +241,10 @@ public class Editor {
 
 		switch (BoardFX.lastHighlightOrien) {
 		case HORIZONTAL:
-			word = boardFX.lastFocused[0].grid.getVWord();
+			word = boardFX.getFocusedGrid().grid.getVWord();
 			break;
 		case VERTICAL:
-			word = boardFX.lastFocused[0].grid.getHWord();
+			word = boardFX.getFocusedGrid().grid.getHWord();
 			break;
 		default:
 			break;
@@ -311,7 +309,7 @@ public class Editor {
 	}
 	
 	protected static void ctrlSelect(GridFX gridFX) {
-		GridFX focus = gridFX.boardFX.lastFocused[0];
+		GridFX focus = gridFX.boardFX.getFocusedGrid();
 		if (!focus.isSelected) {
 			Editor.select(focus);
 		}

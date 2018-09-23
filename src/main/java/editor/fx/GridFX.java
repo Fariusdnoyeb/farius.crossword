@@ -112,38 +112,15 @@ public class GridFX extends StackPane {
 
 //---------------------------------------------------------
 	private void primaryMouseClickHandler(MouseEvent e) {
-		if (e.isShiftDown() && Editor.mode == Mode.EDIT) {
+		if (e.isShiftDown()) {
 			Editor.shiftSelect(this.boardFX.lastFocused[0], this);
-		} else if (e.isControlDown() && Editor.mode == Mode.EDIT) {
+		} else if (e.isControlDown()) {
 			Editor.ctrlSelect(this);
 		} else {
 			if (!this.boardFX.multiselectedGrids.isEmpty()) {
 				Editor.deSelect(this.boardFX);
 			}
-
-			switch (Editor.mode) {
-			case EDIT:
-				Editor.focus(this);
-				break;
-			case PREVIEW:
-				if (!this.isBlack()) {
-					if (this.boardFX.lastFocused[0] == this) {
-						Editor.changeHighlightOrien(this.boardFX);
-						return;
-					}
-
-					Editor.focus(this);
-
-					if (this.grid.getHWord() != null) {
-						Editor.highlight(this.boardFX, this.grid.getHWord());
-					} else if (grid.getVWord() != null) {
-						Editor.highlight(this.boardFX, this.grid.getVWord());
-					} else {
-						Editor.unHighlight(this.boardFX);
-					}
-					break;
-				}
-			}
+			Editor.focus(this);
 		}
 	}
 //---------------------------------------------------------	
