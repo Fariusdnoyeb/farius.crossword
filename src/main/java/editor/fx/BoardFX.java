@@ -17,7 +17,7 @@ public class BoardFX extends GridPane {
 	protected static Word lastHighlighted;
 	protected static Orientation lastHighlightOrien;
 
-	protected EditableBoard board;
+	protected EditableBoard editableBoard;
 	protected GridFX[][] gridFXs;
 
 //-------------------CONSTRUCTORS--------------------------
@@ -27,7 +27,7 @@ public class BoardFX extends GridPane {
 
 //------------------INSTANCE METHODS-----------------------
 	public void make(EditableBoard board) {
-		this.board = board;
+		this.editableBoard = board;
 
 		lastFocused = new GridFX[2];
 		multiselectedGrids = new ArrayList<GridFX>();
@@ -49,6 +49,10 @@ public class BoardFX extends GridPane {
 		this.requestFocus();
 	}
 
+	public EditableBoard getBoard() {
+		return this.editableBoard;
+	}
+	
 	public GridFX getGridFX(Grid grid) {
 		return this.gridFXs[grid.getGridRow()][grid.getGridCol()];
 	}
@@ -66,14 +70,15 @@ public class BoardFX extends GridPane {
 	}
 
 	public int getColSize() {
-		return this.board.getColSize();
+		return this.editableBoard.getColSize();
 	}
 
 	public int getRowSize() {
-		return this.board.getRowSize();
+		return this.editableBoard.getRowSize();
 	}
-	public ArrayList<GridFX> getMultiselectedGrids() {
-		return this.multiselectedGrids;
+	
+	public boolean isMultiSelected() {
+		return !this.multiselectedGrids.isEmpty();
 	}
 // ----------------------------Key Event----------------------------
 	private void addKeyHandler() {
@@ -86,16 +91,16 @@ public class BoardFX extends GridPane {
 
 			if (!this.lastFocused[0].isBlack() && (code.isLetterKey() || code.isDigitKey())) {
 				if (!this.multiselectedGrids.isEmpty())
-					Editor.deSelect(this);
+					Editor.deSelectAll(this);
 				this.lastFocused[0].setText(c); // EDIT vs PREVIEW mode???
 				moveToNextGrid();
 			} else if (code.isWhitespaceKey()) {
 				if (!this.multiselectedGrids.isEmpty())
-					Editor.deSelect(this);
+					Editor.deSelectAll(this);
 				moveToNextGrid();
 			} else if (code.isArrowKey()) {
 				if (!this.multiselectedGrids.isEmpty())
-					Editor.deSelect(this);
+					Editor.deSelectAll(this);
 				navigate(code);
 			} else if (code == KeyCode.DELETE || code == KeyCode.BACK_SPACE) {
 				if (!this.multiselectedGrids.isEmpty()) {
@@ -134,7 +139,7 @@ public class BoardFX extends GridPane {
 		GridFX nowFocused = this.lastFocused[0];
 		switch (code) {
 		case RIGHT:
-			if (nowFocused.getGridCol() + 1 < this.board.getColSize()) {
+			if (nowFocused.getGridCol() + 1 < this.editableBoard.getColSize()) {
 				GridFX gridFX = this.gridFXs[nowFocused.getGridRow()][nowFocused.getGridCol() + 1];
 				Editor.focus(gridFX);
 			}
@@ -155,7 +160,7 @@ public class BoardFX extends GridPane {
 			break;
 
 		case DOWN:
-			if (nowFocused.getGridRow() + 1 < this.board.getRowSize()) {
+			if (nowFocused.getGridRow() + 1 < this.editableBoard.getRowSize()) {
 				GridFX gridFX = this.gridFXs[nowFocused.getGridRow() + 1][nowFocused.getGridCol()];
 				Editor.focus(gridFX);
 			}
@@ -179,14 +184,14 @@ public class BoardFX extends GridPane {
 		int nowCol = nowFocused.grid.getGridCol();
 		int nowRow = nowFocused.grid.getGridRow();
 
-		isNext = nowCol == lastCol + 1 && nowCol + 1 < this.board.getColSize() && nowRow == lastRow
+		isNext = nowCol == lastCol + 1 && nowCol + 1 < this.editableBoard.getColSize() && nowRow == lastRow
 				&& !this.getGridFX(nowRow, nowCol + 1).isBlack();
 		if (isNext) {
 			Editor.focus(this.getGridFX(nowRow, nowCol + 1));
 			return;
 		}
 
-		isNext = nowRow == lastRow + 1 && nowRow + 1 < this.board.getRowSize() && nowCol == lastCol
+		isNext = nowRow == lastRow + 1 && nowRow + 1 < this.editableBoard.getRowSize() && nowCol == lastCol
 				&& !this.getGridFX(nowRow + 1, nowCol).isBlack();
 		if (isNext) {
 			Editor.focus(this.getGridFX(nowRow + 1, nowCol));

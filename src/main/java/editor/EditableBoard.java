@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
+import main.java.editor.fx.controllers.GridAddedElsewhereException;
 import main.java.game.*;
 
 public class EditableBoard extends Board{
@@ -30,11 +31,11 @@ public class EditableBoard extends Board{
 		
 		}
 //------------------INSTANCE METHODS-----------------------
-	public boolean placeWord(Word word, int row, int col, Orientation orien) {
+	public boolean placeWord(Word word, int row, int col, Orientation orien) throws GridAddedElsewhereException {
 		if (word == null ||
 				 row < 0 || row > rowSize ||
 				 col < 0 || col > colSize ||
-				 (orien != Orientation.HORIZONTAL  && orien != Orientation.VERTICAL)) {
+				 orien == Orientation.INVALID) {
 					 return false;
 				 }
 		String wordStr = word.getWord();
@@ -50,6 +51,8 @@ public class EditableBoard extends Board{
 			while (index < length) {
 				charPlaced = wordStr.charAt(index);
 				grid = this.board[row][cursor];
+				if (grid.getHWord() != null)
+					throw new GridAddedElsewhereException();
 				
 				if (gridToCharMap.get(charPlaced) == null) {
 					ArrayList<Grid> gridList = new ArrayList<Grid>();
@@ -69,6 +72,8 @@ public class EditableBoard extends Board{
 			while (index < length) {
 				charPlaced = wordStr.charAt(index);
 				grid = this.board[cursor][col];
+				if (grid.getHWord() != null)
+					throw new GridAddedElsewhereException();
 				
 				if (gridToCharMap.get(charPlaced) == null) {
 					ArrayList<Grid> gridList = new ArrayList<Grid>();
@@ -93,7 +98,6 @@ public class EditableBoard extends Board{
 		words.add(word);
 		
 		return true;
-	
 	}
 	
 	public ArrayList<Grid> getNumberedGrids() {
@@ -129,8 +133,9 @@ public class EditableBoard extends Board{
 		 * @param word : (of type Word)
 		 * @return true if placed successfully,
 		 *		   false if failed to place.
+		 * @throws GridAddedElsewhereException 
 		 */
-		protected boolean placeAtCenter(Word word) {
+		protected boolean placeAtCenter(Word word) throws GridAddedElsewhereException {
 			int length = word.getLength();
 			int col = (this.colSize - length) / 2 + 1;
 			int row = this.rowSize / 2;
@@ -150,8 +155,9 @@ public class EditableBoard extends Board{
 		 * (to preserve length priority).</li>
 		 * </ul> 
 		 * @param wordBank list of words to place onto board.
+		 * @throws GridAddedElsewhereException 
 		 */
-		public void placeList(ArrayList<Word> wordBank) {
+		public void placeList(ArrayList<Word> wordBank) throws GridAddedElsewhereException {
 			Collections.sort(wordBank); //sorts by length. Longest first.
 			
 			Word currentW;
@@ -185,8 +191,9 @@ public class EditableBoard extends Board{
 		 * @param word
 		 * @return true if placed successfully,
 		 * 			false if fails to place.
+		 * @throws GridAddedElsewhereException 
 		 */
-		protected boolean tryPlaceWordToBestPos(Word word) {
+		protected boolean tryPlaceWordToBestPos(Word word) throws GridAddedElsewhereException {
 			final int	HORIZONTAL	= 0;
 //			final int	VERTICAL		= 1;	
 			int[] sugCoor = findBestPos(word);

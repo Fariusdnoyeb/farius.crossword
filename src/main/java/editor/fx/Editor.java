@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javafx.beans.property.IntegerProperty;
@@ -22,6 +23,7 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import main.java.editor.*;
+import main.java.editor.fx.controllers.GridAddedElsewhereException;
 import main.java.game.*;
 
 public class Editor {
@@ -72,7 +74,7 @@ public class Editor {
 	
 	public static void saveAsTemplate(BoardFX boardFX) {
 		Template template = new Template(boardFX.getRowSize(), boardFX.getColSize());
-		EditableBoard board = boardFX.board;
+		EditableBoard board = boardFX.editableBoard;
 		int rowSize = board.getRowSize();
 		int colSize = board.getColSize();
 		for (int row = 0; row < rowSize; row++) {
@@ -114,11 +116,11 @@ public class Editor {
 	}
 	
 	public static void restoreSelectedGrids(BoardFX boardFX) {
-		if (!boardFX.multiselectedGrids.isEmpty()) {
+		if (boardFX.isMultiSelected()) {
 			for (GridFX g : boardFX.multiselectedGrids) {
 				Editor.restore(g);
 			}
-			Editor.deSelect(boardFX);
+			Editor.deSelectAll(boardFX);
 		} else {
 			Editor.restore(boardFX.getFocusedGrid());
 		}
@@ -137,22 +139,22 @@ public class Editor {
 	}
 	
 	public static void blackenSelectedGrids(BoardFX boardFX) {
-		if (!boardFX.multiselectedGrids.isEmpty()) {
+		if (boardFX.isMultiSelected()) {
 			for (GridFX g : boardFX.multiselectedGrids) {
 				Editor.blacken(g);
 			}
-			Editor.deSelect(boardFX);
+			Editor.deSelectAll(boardFX);
 		} else {
 			Editor.blacken(boardFX.getFocusedGrid());
 		}
 	}
 
 	public static void unblackenSelectedGrids(BoardFX boardFX) {
-		if (!boardFX.multiselectedGrids.isEmpty()) {
+		if (boardFX.isMultiSelected()) {
 			for (GridFX g : boardFX.multiselectedGrids) {
 				Editor.unblacken(g);
 			}
-			Editor.deSelect(boardFX);
+			Editor.deSelectAll(boardFX);
 		} else {
 			Editor.unblacken(boardFX.getFocusedGrid());
 		}
@@ -160,29 +162,47 @@ public class Editor {
 //---------------------------------------------------------		
 	public static boolean setClueNumber(GridFX gridFX, int number) {
 		try {
-			if (gridFX.getChildren().size() == 3) {
-				((Label)gridFX.getChildren().get(gridFX.getChildren().size() - 1)).
-												setText(Integer.toString(number));
+			
+			if (gridFX.isBlack()) {
+				Editor.setInfo(InfoMessageEng.BLACK_GRID + " " + InfoMessageEng.NO_ACTION);
+				return false;
+			} else {
+				if (gridFX.getChildren().size() == 3) {
+					((Label)gridFX.getChildren().get(gridFX.getChildren().size() - 1)).
+													setText(Integer.toString(number));
+				}
+				Label numL = new Label();
+				numL.setText(Integer.toString(number));
+				numL.setFont(new Font("Times New Roman", 10));
+				gridFX.getChildren().add(numL);
+				StackPane.setAlignment(numL, Pos.TOP_LEFT);
+				StackPane.setMargin(numL, new Insets(3, 3, 3, 3));
+				numL.addEventHandler(MouseEvent.ANY, e -> gridFX.rec.fireEvent(e));
+				
+				Editor.setInfo(InfoMessageEng.CLUE_NUMBER_ADDITION + " " + InfoMessageEng.SUCCEEDED);
+				return true;
 			}
-			Label numL = new Label();
-			numL.setText(Integer.toString(number));
-			numL.setFont(new Font("Times New Roman", 10));
-			gridFX.getChildren().add(numL);
-			StackPane.setAlignment(numL, Pos.TOP_LEFT);
-			StackPane.setMargin(numL, new Insets(3, 3, 3, 3));
-			numL.addEventHandler(MouseEvent.ANY, e -> gridFX.rec.fireEvent(e));
-			return true;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
+			Editor.setInfo(InfoMessageEng.CLUE_NUMBER_ADDITION + " " + InfoMessageEng.FAILED);
 			return false;
 		}
 	}
 	
-	public static void removeClueNumberIfAny(GridFX gridFX) {
-		ObservableList childrens = gridFX.getChildren();
-		int size = childrens.size();
-		if (size == 3) {
-			childrens.remove(size - 1);
+	public static boolean removeClueNumberIfAny(GridFX gridFX) {
+		try {
+			ObservableList childrens = gridFX.getChildren();
+			int size = childrens.size();
+			if (size == 3) {
+				childrens.remove(size - 1);
+			}
+			Editor.setInfo(InfoMessageEng.CLUE_NUMBER_REMOVAL + " " + InfoMessageEng.SUCCEEDED);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Editor.setInfo(InfoMessageEng.CLUE_NUMBER_REMOVAL + " " + InfoMessageEng.FAILED);
+			return false;
 		}
 	}
 //---------------------------------------------------------	
@@ -270,7 +290,7 @@ public class Editor {
 			BoardFX boardFX = start.getBoardFX();
 			
 			if (!boardFX.multiselectedGrids.isEmpty()) {
-				deSelect(boardFX);
+				deSelectAll(boardFX);
 			}
 			int startX, startY, endX, endY;
 
@@ -308,6 +328,7 @@ public class Editor {
 		}
 	
 	}
+	
 	protected static void select(GridFX gridFX) {
 		Editor.highlight(gridFX);
 		gridFX.boardFX.multiselectedGrids.add(gridFX);
@@ -334,7 +355,7 @@ public class Editor {
 		gridFX.isSelected = false;
 	}
 	
-	protected static void deSelect(BoardFX boardFX) {
+	protected static void deSelectAll(BoardFX boardFX) {
 		for (GridFX g : boardFX.multiselectedGrids) {
 			if (g.isBlack()) 
 				g.rec.setFill(Color.BLACK);
@@ -344,6 +365,84 @@ public class Editor {
 		}
 		boardFX.multiselectedGrids = new ArrayList<GridFX>();
 	}
+	
 //----------------------------------------------------------------------
+	private static Word extractWordFromSelectedGrids(BoardFX boardFX) throws EmptyGridException {
+		ArrayList<GridFX> grids = boardFX.multiselectedGrids;
+		Collections.sort(grids);
+		
+		String word = grids.get(0).getText();
+		
+		int row = grids.get(0).getGridRow();
+		boolean isConsecutivelyHorizontal = true;
+		for (int i = 1; i < grids.size(); i++) {
+			if ( grids.get(i).getGridRow() != row 
+					|| grids.get(i).getGridCol() != grids.get(i - 1).getGridCol() + 1
+					|| grids.get(i).isBlack() ) {
+				isConsecutivelyHorizontal = false;
+				word = grids.get(0).getText();
+				break;
+			} else {
+				if (grids.get(i).getText() == "")
+					throw new EmptyGridException();
+				word = word + grids.get(i).getText();
+			}
+		}
+		
+		int col = grids.get(0).getGridCol();
+		boolean isConsecutivelyVertical = true;
+		if (!isConsecutivelyHorizontal) {
+			for (int i = 1; i < grids.size(); i++) {
+				if ( grids.get(i).getGridCol() != col 
+						|| grids.get(i).getGridRow() != grids.get(i - 1).getGridRow() + 1
+						|| grids.get(i).isBlack() ) {
+					isConsecutivelyVertical = false;
+					break;
+				} else {
+					if (grids.get(i).getText() == "")
+						throw new EmptyGridException();
+					word = word + grids.get(i).getText();
+				}
+			}
+		}
+		Orientation orien;
+		if (isConsecutivelyHorizontal) {
+			orien = Orientation.HORIZONTAL;
+		} else if (isConsecutivelyVertical)
+			orien = Orientation.VERTICAL;
+		else 
+			return null;
+		
+		Word extractedWord = new Word(word);
+		extractedWord.setColIndex(col);
+		extractedWord.setOrien(orien);
+		extractedWord.setRowIndex(row);
+		return extractedWord;
+	
+	}
+	
+	public static boolean addWordFromSelectedGrids(BoardFX boardFX) {
+		if (!boardFX.isMultiSelected()) {
+			Editor.setInfo(InfoMessageEng.NO_ACTION + " " + InfoMessageEng.ADD_WORD_FROM_SELECTED_GRIDS_INS);
+			return false;
+		} else {
 
+			try {
+				Word extractedWord = Editor.extractWordFromSelectedGrids(boardFX);
+				if (extractedWord != null) {
+					boardFX.editableBoard.placeWord(extractedWord, extractedWord.getRowIndex(),
+							extractedWord.getColIndex(), extractedWord.getOrien());
+					Editor.setInfo(extractedWord.getWord() + " " + InfoMessageEng.WORD_ADDED + " "
+							+ InfoMessageEng.CLUE_NUMBER_REMINDER);
+					return true;
+				}
+			} catch (GridAddedElsewhereException e) {
+				Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+			} catch (EmptyGridException e) {
+				Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+			}
+			return false;
+		}
+	}
+		
 }

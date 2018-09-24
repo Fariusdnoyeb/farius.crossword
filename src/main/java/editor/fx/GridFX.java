@@ -14,7 +14,7 @@ import javafx.scene.text.Font;
 
 import main.java.game.*;
 
-public class GridFX extends StackPane {
+public class GridFX extends StackPane implements Comparable<GridFX>{
 //-----------------DATA MEMBERS---------------------------
 	private static final int GRID_SIZE = 35;
 	private static final int LETTER_SIZE = 20;
@@ -34,7 +34,7 @@ public class GridFX extends StackPane {
 		this.boardFX = boardFX;
 		isSelected = false;
 
-		this.grid = new Grid(boardFX.board, row, col);
+		this.grid = new Grid(boardFX.editableBoard, row, col);
 
 		label = new Label();
 		label.setFont(new Font("Times New Roman", LETTER_SIZE));
@@ -43,7 +43,7 @@ public class GridFX extends StackPane {
 		rec.setStroke(Color.BLACK);
 
 		this.setOnContextMenuRequested(event -> {
-			if (this.boardFX.multiselectedGrids.isEmpty()) {
+			if (this.boardFX.isMultiSelected()) {
 				Editor.focus(this);
 			}
 			this.boardFX.GRID_CONTEXT_MENU.relabel();
@@ -56,6 +56,10 @@ public class GridFX extends StackPane {
 	}
 
 //------------------INSTANCE METHODS-----------------------
+	public String getText() {
+		return this.label.getText();
+	}
+	
 	public int getGridRow() {
 		return this.grid.getGridRow();
 	}
@@ -113,16 +117,36 @@ public class GridFX extends StackPane {
 //---------------------------------------------------------
 	private void primaryMouseClickHandler(MouseEvent e) {
 		if (e.isShiftDown()) {
+			if (this.boardFX.isMultiSelected()) {
+				Editor.deSelectAll(this.boardFX);
+			}
 			Editor.shiftSelect(this.boardFX.lastFocused[0], this);
 		} else if (e.isControlDown()) {
-			Editor.ctrlSelect(this);
+			if (!this.isSelected) 
+				Editor.ctrlSelect(this);
+			else 
+				Editor.deSelect(this);
 		} else {
-			if (!this.boardFX.multiselectedGrids.isEmpty()) {
-				Editor.deSelect(this.boardFX);
+			if (this.boardFX.isMultiSelected()) {
+				Editor.deSelectAll(this.boardFX);
 			}
 			Editor.focus(this);
 		}
 	}
 //---------------------------------------------------------	
-
+	@Override
+	public int compareTo(GridFX other) {
+		if (this.getGridRow() < other.getGridRow()) 
+			return -1;
+		else if (this.getGridRow() > other.getGridRow()) 
+			return 1;
+		else {
+			if (this.getGridCol() < other.getGridCol()) 
+				return -1;
+			else if (this.getGridCol() > other.getGridCol())
+				return 1;
+			else
+				return 0;
+		}
+	}	
 }

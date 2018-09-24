@@ -45,7 +45,7 @@
                               <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator>
                         </MenuItem>
-                        <MenuItem fx:id="addWordMI" text="Add Word..." />
+                        <MenuItem fx:id="addWordMI" onAction="#addWordFromSelectedGrids" text="Add Word from Selected Grids" />
                      </items>
                   </Menu>
                   <Menu mnemonicParsing="false" text="Help">

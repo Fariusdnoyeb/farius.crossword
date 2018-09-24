@@ -127,27 +127,29 @@ public class MainController {
 	}
 	
 	@FXML private void setClueNumber() throws InterruptedException, ExecutionException {
-		
-		GridFX focus = selectedTab.getTabContent().getBoardFX().getFocusedGrid();
-		if (focus.isBlack()) {
-			Editor.setInfo(InfoMessageEng.BLACK_GRID + " " + InfoMessageEng.NO_ACTION);
-			return;
-		} else {	
-			InputHandler<String> inputHandler = (input) -> {
-				boolean isSuccessful = false;
-				if (Editor.setClueNumber(focus, Integer.parseInt(input)))
-					isSuccessful = true;
-				focus.requestFocus();
-				return isSuccessful;
-			};
-			userInput.performAction(UserInputMode.NUMBER, inputHandler);
-			Editor.setInfo(InfoMessageEng.SET_CLUE_INS);
-		}
-		
+
+		GridFX gridFX = selectedTab.getTabContent().getBoardFX().getFocusedGrid();
+
+		InputHandler<String> inputHandler = (input) -> {
+			boolean isSuccessful = false;
+			if (Editor.setClueNumber(gridFX, Integer.parseInt(input)))
+				isSuccessful = true;
+			gridFX.requestFocus();
+			return isSuccessful;
+		};
+		userInput.performAction(UserInputMode.NUMBER, inputHandler);
+		Editor.setInfo(InfoMessageEng.SET_CLUE_INS);
+
 	}
 	
 	@FXML private void removeClueNumber() {
-		Editor.removeClueNumberIfAny(selectedTab.getTabContent().getBoardFX().getFocusedGrid());
+		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		Editor.removeClueNumberIfAny(boardFX.getFocusedGrid());
+	}
+	
+	@FXML private void addWordFromSelectedGrids() {
+		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		Editor.addWordFromSelectedGrids(boardFX);
 	}
 	
 	@FXML private void new15() {
