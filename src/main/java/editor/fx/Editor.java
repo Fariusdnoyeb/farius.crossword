@@ -158,18 +158,24 @@ public class Editor {
 		}
 	}
 //---------------------------------------------------------		
-	public static void setClueNumber(GridFX gridFX, int number) {
-		if (gridFX.getChildren().size() == 3) {
-			((Label)gridFX.getChildren().get(gridFX.getChildren().size() - 1)).
-											setText(Integer.toString(number));
+	public static boolean setClueNumber(GridFX gridFX, int number) {
+		try {
+			if (gridFX.getChildren().size() == 3) {
+				((Label)gridFX.getChildren().get(gridFX.getChildren().size() - 1)).
+												setText(Integer.toString(number));
+			}
+			Label numL = new Label();
+			numL.setText(Integer.toString(number));
+			numL.setFont(new Font("Times New Roman", 10));
+			gridFX.getChildren().add(numL);
+			StackPane.setAlignment(numL, Pos.TOP_LEFT);
+			StackPane.setMargin(numL, new Insets(3, 3, 3, 3));
+			numL.addEventHandler(MouseEvent.ANY, e -> gridFX.rec.fireEvent(e));
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
-		Label numL = new Label();
-		numL.setText(Integer.toString(number));
-		numL.setFont(new Font("Times New Roman", 10));
-		gridFX.getChildren().add(numL);
-		StackPane.setAlignment(numL, Pos.TOP_LEFT);
-		StackPane.setMargin(numL, new Insets(3, 3, 3, 3));
-		numL.addEventHandler(MouseEvent.ANY, e -> gridFX.rec.fireEvent(e));
 	}
 	
 	public static void removeClueNumberIfAny(GridFX gridFX) {

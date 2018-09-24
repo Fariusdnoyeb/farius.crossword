@@ -16,6 +16,9 @@ public class UserInput extends HBox{
 	private	ChangeListener<String> listener;
 	private InputHandler<String> inputHandler;
 	
+	private String successMessgae;
+	private String failureMessage;
+	
 	public UserInput() {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setLocation(getClass().getResource("/main/resources/view/UserInput.fxml"));
@@ -31,13 +34,25 @@ public class UserInput extends HBox{
 		this.button = (Button)this.getChildren().get(1);
 		
 		addEventListener();
+		listener = null;
+		inputHandler = null;
+		textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue == false && listener != null ) {
+				textField.textProperty().removeListener(listener);
+			}
+		});
+		
+		successMessgae = new String("Succeeded.");
+		failureMessage = new String("Falied.");
+		
 	}
 	
 	public String getInput() {
 		return this.textField.getText();
 	}
 	
-	public void performAction(UserInputMode userInputMode, InputHandler<String> inputHandler) {
+	public void performAction(UserInputMode userInputMode, 
+			InputHandler<String> inputHandler) {
 		this.inputHandler = inputHandler;
 		switch (userInputMode) {
 		case NUMBER:
@@ -48,14 +63,31 @@ public class UserInput extends HBox{
 		textField.requestFocus();
 	}
 	
+	public void performAction(UserInputMode userInputMode, 
+			InputHandler<String> inputHandler, 
+			String successMessage, String failureMessage) {
+		this.successMessgae = successMessage;
+		this.failureMessage = failureMessage;
+		performAction(userInputMode, inputHandler);
+	}
+	
 	public void addEventListener( ) {
 		textField.setOnAction(e -> button.fire());
 		button.setOnAction(e -> { 
-			if (!(this.inputHandler == null)) {
-				inputHandler.handle(textField.getText());
+			if (this.inputHandler != null) {
+				if (inputHandler.handle(textField.getText())) {
+					Editor.setInfo(successMessgae);
+				} else {
+					Editor.setInfo(failureMessage);
+				}
 				textField.setText("");
 				removeListenter();
 				inputHandler = null;
+				successMessgae = new String("Succeeded.");
+				failureMessage = new String("Falied.");
+			} else {
+				textField.setText("");
+				Editor.setInfo(InfoMessageEng.NO_ACTION);
 			}
 		});
 	}
@@ -71,6 +103,7 @@ public class UserInput extends HBox{
 	
 	private void removeListenter() {
 		textField.textProperty().removeListener(listener);
+		listener = null;
 	}
 	
 }

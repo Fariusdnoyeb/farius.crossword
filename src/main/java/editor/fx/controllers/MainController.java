@@ -21,6 +21,7 @@ import main.java.editor.fx.BoardTab;
 import main.java.editor.fx.BoardTabContent;
 import main.java.editor.fx.Editor;
 import main.java.editor.fx.GridFX;
+import main.java.editor.fx.InfoMessageEng;
 import main.java.editor.fx.InputHandler;
 import main.java.editor.fx.UserInput;
 import main.java.editor.fx.UserInputMode;
@@ -64,6 +65,7 @@ public class MainController {
 		closeTabMI.disableProperty().bind(noTab);
 		clearBoardMI.disableProperty().bind(noTab);
 		setClueNumberMI.disableProperty().bind(noTab);
+		removeClueNumberMI.disableProperty().bind(noTab);
 		addWordMI.disableProperty().bind(noTab);
 		
 		tabPane.getSelectionModel().selectedItemProperty().addListener((c, oldTab, newTab) -> {
@@ -127,12 +129,20 @@ public class MainController {
 	@FXML private void setClueNumber() throws InterruptedException, ExecutionException {
 		
 		GridFX focus = selectedTab.getTabContent().getBoardFX().getFocusedGrid();
-
-		InputHandler<String> inputHandler = (input) -> {
-			Editor.setClueNumber(focus, Integer.parseInt(input));
-			focus.requestFocus();
-		};
-		userInput.performAction(UserInputMode.NUMBER, inputHandler);
+		if (focus.isBlack()) {
+			Editor.setInfo(InfoMessageEng.BLACK_GRID + " " + InfoMessageEng.NO_ACTION);
+			return;
+		} else {	
+			InputHandler<String> inputHandler = (input) -> {
+				boolean isSuccessful = false;
+				if (Editor.setClueNumber(focus, Integer.parseInt(input)))
+					isSuccessful = true;
+				focus.requestFocus();
+				return isSuccessful;
+			};
+			userInput.performAction(UserInputMode.NUMBER, inputHandler);
+			Editor.setInfo(InfoMessageEng.SET_CLUE_INS);
+		}
 		
 	}
 	

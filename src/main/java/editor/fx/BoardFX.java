@@ -72,7 +72,9 @@ public class BoardFX extends GridPane {
 	public int getRowSize() {
 		return this.board.getRowSize();
 	}
-
+	public ArrayList<GridFX> getMultiselectedGrids() {
+		return this.multiselectedGrids;
+	}
 // ----------------------------Key Event----------------------------
 	private void addKeyHandler() {
 		this.setOnKeyPressed(e -> {
