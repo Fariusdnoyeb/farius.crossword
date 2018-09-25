@@ -24,21 +24,20 @@ public class BoardFX extends GridPane {
 	public BoardFX() {
 		super();
 	}
-
 //------------------INSTANCE METHODS-----------------------
-	public void make(EditableBoard board) {
-		this.editableBoard = board;
+	public void make(EditableBoard editableBoard) {
+		this.editableBoard = editableBoard;
 
 		lastFocused = new GridFX[2];
 		multiselectedGrids = new ArrayList<GridFX>();
 
-		int rowSize = board.getRowSize();
-		int colSize = board.getColSize();
+		int rowSize = editableBoard.getRowSize();
+		int colSize = editableBoard.getColSize();
 		gridFXs = new GridFX[rowSize][colSize];
 		GridFX gridFX;
 		for (int row = 0; row < rowSize; row++) {
 			for (int col = 0; col < colSize; col++) {
-				gridFX = new GridFX(this, row, col);
+				gridFX = new GridFX(this, editableBoard.getGrid(row, col));
 				this.gridFXs[row][col] = gridFX;
 				this.add(gridFX, col, row);
 			}
@@ -49,7 +48,7 @@ public class BoardFX extends GridPane {
 		this.requestFocus();
 	}
 
-	public EditableBoard getBoard() {
+	public EditableBoard getEditableBoard() {
 		return this.editableBoard;
 	}
 	
@@ -105,34 +104,14 @@ public class BoardFX extends GridPane {
 			} else if (code == KeyCode.DELETE || code == KeyCode.BACK_SPACE) {
 				if (!this.multiselectedGrids.isEmpty()) {
 					for (GridFX g : this.multiselectedGrids) {
-						g.setText('\0');
+						g.setText("");
 					}
 				} else
-					this.lastFocused[0].setText('\0');
+					this.lastFocused[0].setText("");
 			}
 
 		});
 		
-	}
-
-	protected void changeHighlightOrien() {
-		Word word = null;
-
-		switch (BoardFX.lastHighlightOrien) {
-		case HORIZONTAL:
-			word = this.lastFocused[0].grid.getVWord();
-			break;
-		case VERTICAL:
-			word = this.lastFocused[0].grid.getHWord();
-			break;
-		default:
-			break;
-		}
-
-		if (word != null) {
-			Editor.highlight(this, word);
-
-		}
 	}
 
 	private void navigate(KeyCode code) {
@@ -200,109 +179,131 @@ public class BoardFX extends GridPane {
 		}
 
 	}
-//-----------------------------------------------------------
-	private void moveGrid(KeyCode code) {
-		GridFX nowFocused = this.lastFocused[0];
-		Word word = null;
-		int index = Grid.INVALID;
-		switch (code) {
-		case RIGHT:
-			word = nowFocused.grid.getHWord();
-			if (word != null) {
-				index = nowFocused.grid.getHIndex();
-				index++;
-				if (index == word.getLength())
-					index = 0;
-
-				Editor.focus(this.getGridFX(word.getGrid(index)));
-
-				if (BoardFX.lastHighlightOrien == Orientation.VERTICAL) {
-					changeHighlightOrien();
-				}
-			}
-			break;
-
-		case LEFT:
-			word = nowFocused.grid.getHWord();
-			if (word != null) {
-				index = nowFocused.grid.getHIndex();
-				index--;
-				if (index == Grid.INVALID)
-					index = word.getLength() - 1;
-
-				Editor.focus(this.getGridFX(word.getGrid(index)));
-
-				if (BoardFX.lastHighlightOrien == Orientation.VERTICAL) {
-					changeHighlightOrien();
-				}
-			}
-
-			break;
-
-		case UP:
-			word = nowFocused.grid.getVWord();
-			if (word != null) {
-				index = nowFocused.grid.getVIndex();
-				index--;
-				if (index == Grid.INVALID)
-					index = word.getLength() - 1;
-
-				Editor.focus(this.getGridFX(word.getGrid(index)));
-
-				if (BoardFX.lastHighlightOrien == Orientation.HORIZONTAL) {
-					changeHighlightOrien();
-				}
-			}
-			break;
-
-		case DOWN:
-			word = nowFocused.grid.getVWord();
-			if (word != null) {
-				index = nowFocused.grid.getVIndex();
-				index++;
-				if (index == word.getLength())
-					index = 0;
-
-				Editor.focus(this.getGridFX(word.getGrid(index)));
-
-				if (BoardFX.lastHighlightOrien == Orientation.HORIZONTAL) {
-					changeHighlightOrien();
-				}
-			}
-			break;
-		default:
-			break;
-
-		}
-
-	}
+//-------------------------PREVIEW-----------------------------
+//	protected void changeHighlightOrien() {
+//		Word word = null;
+//
+//		switch (BoardFX.lastHighlightOrien) {
+//		case HORIZONTAL:
+//			word = this.lastFocused[0].grid.getVWord();
+//			break;
+//		case VERTICAL:
+//			word = this.lastFocused[0].grid.getHWord();
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		if (word != null) {
+//			Editor.highlight(this, word);
+//
+//		}
+//	}
+//	
+//	private void moveGrid(KeyCode code) {
+//		GridFX nowFocused = this.lastFocused[0];
+//		Word word = null;
+//		int index = Grid.INVALID;
+//		switch (code) {
+//		case RIGHT:
+//			word = nowFocused.grid.getHWord();
+//			if (word != null) {
+//				index = nowFocused.grid.getHIndex();
+//				index++;
+//				if (index == word.getLength())
+//					index = 0;
+//
+//				Editor.focus(this.getGridFX(word.getGrid(index)));
+//
+//				if (BoardFX.lastHighlightOrien == Orientation.VERTICAL) {
+//					changeHighlightOrien();
+//				}
+//			}
+//			break;
+//
+//		case LEFT:
+//			word = nowFocused.grid.getHWord();
+//			if (word != null) {
+//				index = nowFocused.grid.getHIndex();
+//				index--;
+//				if (index == Grid.INVALID)
+//					index = word.getLength() - 1;
+//
+//				Editor.focus(this.getGridFX(word.getGrid(index)));
+//
+//				if (BoardFX.lastHighlightOrien == Orientation.VERTICAL) {
+//					changeHighlightOrien();
+//				}
+//			}
+//
+//			break;
+//
+//		case UP:
+//			word = nowFocused.grid.getVWord();
+//			if (word != null) {
+//				index = nowFocused.grid.getVIndex();
+//				index--;
+//				if (index == Grid.INVALID)
+//					index = word.getLength() - 1;
+//
+//				Editor.focus(this.getGridFX(word.getGrid(index)));
+//
+//				if (BoardFX.lastHighlightOrien == Orientation.HORIZONTAL) {
+//					changeHighlightOrien();
+//				}
+//			}
+//			break;
+//
+//		case DOWN:
+//			word = nowFocused.grid.getVWord();
+//			if (word != null) {
+//				index = nowFocused.grid.getVIndex();
+//				index++;
+//				if (index == word.getLength())
+//					index = 0;
+//
+//				Editor.focus(this.getGridFX(word.getGrid(index)));
+//
+//				if (BoardFX.lastHighlightOrien == Orientation.HORIZONTAL) {
+//					changeHighlightOrien();
+//				}
+//			}
+//			break;
+//		default:
+//			break;
+//
+//		}
+//
+//	}
+//	
+//	private void traverseWord() {
+//		GridFX lastFocused = this.lastFocused[0];
+//		Word word = null;
+//		int index = Grid.INVALID;
+//
+//		switch (BoardFX.lastHighlightOrien) {
+//		case HORIZONTAL:
+//			word = lastFocused.grid.getHWord();
+//			index = lastFocused.grid.getHIndex();
+//			break;
+//		case VERTICAL:
+//			word = lastFocused.grid.getVWord();
+//			index = lastFocused.grid.getVIndex();
+//			break;
+//		default:
+//			break;
+//		}
+//		if (word != null) {
+//			index++;
+//			if (index == word.getLength())
+//				index = 0;
+//
+//			Editor.focus(this.getGridFX(word.getGrid(index)));
+//
+//		} else {
+//			moveToNextGrid();
+//		}
+//	}
 	
-	private void traverseWord() {
-		GridFX lastFocused = this.lastFocused[0];
-		Word word = null;
-		int index = Grid.INVALID;
-
-		switch (BoardFX.lastHighlightOrien) {
-		case HORIZONTAL:
-			word = lastFocused.grid.getHWord();
-			index = lastFocused.grid.getHIndex();
-			break;
-		case VERTICAL:
-			word = lastFocused.grid.getVWord();
-			index = lastFocused.grid.getVIndex();
-			break;
-		default:
-			break;
-		}
-		if (word != null) {
-			index++;
-			if (index == word.getLength())
-				index = 0;
-
-			Editor.focus(this.getGridFX(word.getGrid(index)));
-
-		} else {
-			moveToNextGrid();
-		}
-	}
+	
 }

@@ -30,14 +30,14 @@ public class Board {
 	@Override
 	public String toString() {
 		String retVal = "";
-		char gridChar;
+		String gridChar;
 		for (int row = 0; row <rowSize; row++) {
 			for (int col = 0; col < colSize; col++) {
 				gridChar = board[row][col].getContent();
-				if (gridChar == '\0') {
+				if (gridChar == "") {
 					retVal = retVal + "-";
 				}else {
-					retVal = retVal + Character.toString(gridChar);
+					retVal = retVal + gridChar;
 				}
 			}
 			retVal = retVal + '\n';

@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import main.java.editor.fx.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1066.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.editor.fx.controllers.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1066.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.controllers.MainController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -23,7 +23,9 @@
                               <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
                         <MenuItem onAction="#loadTemplate" text="Load Template..." />
-                        <MenuItem mnemonicParsing="false" onAction="#saveAsTemplate" text="Save as Template" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAsTemplate" text="Save as Template..." />
+                        <MenuItem mnemonicParsing="false" onAction="#importGame" text="Import Game..." />
+                        <MenuItem mnemonicParsing="false" onAction="#exportGame" text="Export Game..." />
                         <MenuItem text="Exit." />
                      </items>
                   </Menu>
@@ -45,7 +47,8 @@
                               <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator>
                         </MenuItem>
-                        <MenuItem fx:id="addWordMI" onAction="#addWordFromSelectedGrids" text="Add Word from Selected Grids" />
+                        <MenuItem fx:id="addWordFromSelectedMI" onAction="#addWordFromSelectedGrids" text="Add Word from Selected Grids" />
+                        <MenuItem fx:id="addWordMI" mnemonicParsing="false" onAction="#addWordFromPrompt" text="Add Word..." />
                      </items>
                   </Menu>
                   <Menu mnemonicParsing="false" text="Help">
@@ -63,7 +66,7 @@
                         <RadioButton layoutX="112.0" layoutY="138.0" mnemonicParsing="false" />
                      </children>
                   </HBox>
-                  <Button mnemonicParsing="false" text="Button" />
+                  <Button fx:id="printButton" mnemonicParsing="false" onAction="#print" text="Print" />
                   <Button mnemonicParsing="false" text="Button" />
                </children>
                <padding>

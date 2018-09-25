@@ -1,4 +1,4 @@
-package main.java.editor.fx.controllers;
+package main.java.editor.exception;
 
 import main.java.editor.fx.InfoMessageEng;
 

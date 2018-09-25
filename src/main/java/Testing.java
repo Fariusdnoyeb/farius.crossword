@@ -156,17 +156,17 @@ public class Testing extends Application {
 		
 		
 //Loading template		
-		
-		Template template;
-		try (ObjectInputStream inStream 
-				= new ObjectInputStream(new FileInputStream("template_prototype.cwtpl"))) {
-			
-			template = (Template)inStream.readObject();
-			Editor.loadTemplate(template, boardFX);
-			
-		} catch (IOException e)	{
-			System.out.println("Exception during deserialization: " + e);
-		}
+//		
+//		Template template;
+//		try (ObjectInputStream inStream 
+//				= new ObjectInputStream(new FileInputStream("template_prototype.cwtpl"))) {
+//			
+//			template = (Template)inStream.readObject();
+//			Editor.loadTemplate(template, boardFX);
+//			
+//		} catch (IOException e)	{
+//			System.out.println("Exception during deserialization: " + e);
+//		}
 		
 		
 //Testing AI

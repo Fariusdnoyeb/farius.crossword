@@ -10,8 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 
 public class UserInput extends HBox{
-	TextField textField;
-	Button button;
+	private TextField textField;
+	private Button button;
 	
 	private	ChangeListener<String> listener;
 	private InputHandler<String> inputHandler;

@@ -1,4 +1,4 @@
-package main.java.editor.fx.controllers;
+package main.java.controllers;
 
 import java.util.concurrent.ExecutionException;
 
@@ -10,12 +10,14 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
-
+import main.java.editor.ExtractedWord;
+import main.java.editor.fx.AddWordPrompt;
 import main.java.editor.fx.BoardFX;
 import main.java.editor.fx.BoardTab;
 import main.java.editor.fx.BoardTabContent;
@@ -25,6 +27,7 @@ import main.java.editor.fx.InfoMessageEng;
 import main.java.editor.fx.InputHandler;
 import main.java.editor.fx.UserInput;
 import main.java.editor.fx.UserInputMode;
+import main.java.game.Word;
 
 public class MainController {
 	
@@ -35,6 +38,7 @@ public class MainController {
 	@FXML MenuItem clearBoardMI;
 	@FXML MenuItem setClueNumberMI;
 	@FXML MenuItem removeClueNumberMI;
+	@FXML MenuItem addWordFromSelectedMI;
 	@FXML MenuItem addWordMI;
 	
 	@FXML HBox boardCursorStatus;
@@ -43,6 +47,7 @@ public class MainController {
 	
 	@FXML UserInput userInput;
 	
+	@FXML Button printButton;
 	private final BooleanProperty noTab = new SimpleBooleanProperty(true);
 
 	
@@ -66,6 +71,7 @@ public class MainController {
 		clearBoardMI.disableProperty().bind(noTab);
 		setClueNumberMI.disableProperty().bind(noTab);
 		removeClueNumberMI.disableProperty().bind(noTab);
+		addWordFromSelectedMI.disableProperty().bind(noTab);
 		addWordMI.disableProperty().bind(noTab);
 		
 		tabPane.getSelectionModel().selectedItemProperty().addListener((c, oldTab, newTab) -> {
@@ -93,6 +99,11 @@ public class MainController {
 		
 	}
 	
+	@FXML private void print() {
+		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		System.out.println(boardFX.getEditableBoard().toString());
+	}
+	
 	private void addMouseEventEnterAndExit(Node node, String infoMessage) {
 		node.setOnMouseEntered(e -> {
 			Editor.setInfo(infoMessage);
@@ -100,21 +111,6 @@ public class MainController {
 		node.setOnMouseExited(e -> {
 			Editor.clearInfo();
 		});
-	}
-	
-	
-	@FXML private void loadTemplate() throws Exception{
-		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
-		selectedTab.getTabContent().loadTempalte();
-	}
-
-	@FXML private void newBoard() {
-
-		BoardTab newTab = new BoardTab("Untitled " + tabPane.getTabs().size(), new BoardTabContent());
-		tabPane.getTabs().add(newTab);
-		tabPane.getSelectionModel().select(newTab);
-		
-		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
 	}
 
 	@FXML private void closeSelectedTab() {
@@ -125,14 +121,14 @@ public class MainController {
 	@FXML private void clearBoard() {
 		Editor.clearBoard(selectedTab.getTabContent().getBoardFX());
 	}
-	
+//-----------------------------------------------------------------	
 	@FXML private void setClueNumber() throws InterruptedException, ExecutionException {
 
 		GridFX gridFX = selectedTab.getTabContent().getBoardFX().getFocusedGrid();
 
 		InputHandler<String> inputHandler = (input) -> {
 			boolean isSuccessful = false;
-			if (Editor.setClueNumber(gridFX, Integer.parseInt(input)))
+			if (!input.isEmpty() && Editor.setClueNumber(gridFX, Integer.parseInt(input)))
 				isSuccessful = true;
 			gridFX.requestFocus();
 			return isSuccessful;
@@ -147,17 +143,50 @@ public class MainController {
 		Editor.removeClueNumberIfAny(boardFX.getFocusedGrid());
 	}
 	
+//-----------------------------------------------------------------	
 	@FXML private void addWordFromSelectedGrids() {
 		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
 		Editor.addWordFromSelectedGrids(boardFX);
 	}
-	
+	@FXML private void addWordFromPrompt() throws Exception {
+		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		
+		AddWordPrompt prompt = new AddWordPrompt(boardFX.getFocusedGrid(), userInput.getScene().getWindow());
+		ExtractedWord extractedWord = prompt.prompt();
+		
+		Editor.addWordFromPrompt(extractedWord, boardFX);
+	}
+//-----------------------------------------------------------------	
 	@FXML private void new15() {
 		newBoard();
 		selectedTab.getTabContent().makeBoard();
 	}
+	@FXML private void newBoard() {
+
+		BoardTab newTab = new BoardTab("Untitled " + tabPane.getTabs().size(), new BoardTabContent());
+		tabPane.getTabs().add(newTab);
+		tabPane.getSelectionModel().select(newTab);
+		
+		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
+	}
+//-----------------------------------------------------------------
+	@FXML private void loadTemplate() throws Exception{
+		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
+		selectedTab.getTabContent().loadTempalte();
+	}
 	
 	@FXML private void saveAsTemplate() {
-		selectedTab.getTabContent().saveAsTemplate();
+		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		Editor.saveAsTemplate(boardFX);
+	}
+	
+	@FXML private void importGame() throws Exception	{
+		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
+		selectedTab.getTabContent().importGame();
+	}
+	
+	@FXML private void exportGame() {
+		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		Editor.exportGame(boardFX);
 	}
 }

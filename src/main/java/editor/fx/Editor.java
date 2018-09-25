@@ -1,7 +1,9 @@
 package main.java.editor.fx;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,16 +25,16 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import main.java.editor.*;
-import main.java.editor.fx.controllers.GridAddedElsewhereException;
+import main.java.editor.exception.BlackGridException;
+import main.java.editor.exception.EmptyGridException;
+import main.java.editor.exception.EmptyWordException;
+import main.java.editor.exception.GridAddedElsewhereException;
 import main.java.game.*;
 
 public class Editor {
 //-------------------DATA MEMBERS-------------------------
 	
-	private static Stop[] stops = new Stop[] { new Stop(0, Color.WHITE), new Stop(1, Color.ORANGE) };
-	private static LinearGradient lg = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, stops);
-
-	protected static final String DEFAULT_INFO = "";
+	protected static final String DEFAULT_INFO = "...";
 	protected static final StringProperty info = new SimpleStringProperty("");
 
 	protected static final IntegerProperty focusedRowIndex = new SimpleIntegerProperty(0);// grid row index
@@ -65,26 +67,20 @@ public class Editor {
 		focusedColIndex.set(gridFX.grid.getGridCol());
 	}
 //---------------------------------------------------------
-	public static void loadTemplate(Template template, BoardFX boardFX) {
-		
-		boardFX.make((new EditableBoard(template.getRowSize(), template.getColSize())));
-		template.loadBlackAndClue(boardFX);
-		
-	}
-	
 	public static void saveAsTemplate(BoardFX boardFX) {
 		Template template = new Template(boardFX.getRowSize(), boardFX.getColSize());
-		EditableBoard board = boardFX.editableBoard;
-		int rowSize = board.getRowSize();
-		int colSize = board.getColSize();
+		
+		GridFX gridFX;
+		int rowSize = boardFX.getRowSize();
+		int colSize = boardFX.getColSize();
 		for (int row = 0; row < rowSize; row++) {
 			for (int col = 0; col < colSize; col++) {
-				if(board.getGrid(row, col).isBlack())
-					template.addBlackCoor(row, col);;
+				gridFX = boardFX.getGridFX(row, col);
+				if(gridFX.isBlack())
+					template.addBlackCoor(row, col);
+				if (gridFX.isNumbered())
+					template.addClueCoor(row, col);
 			}
-		}
-		for (Grid grid : board.getNumberedGrids()) {
-			template.addClueCoor(grid.getGridRow(), grid.getGridCol());
 		}
 		
 		try (ObjectOutputStream outStream = 
@@ -96,19 +92,75 @@ public class Editor {
 			System.out.println("Exception during serialization: " + e);
 		}
 	}
+	public static void loadTemplate(BoardFX boardFX) throws ClassNotFoundException {
+		
+		Template template;
+		try (ObjectInputStream inStream 
+				= new ObjectInputStream(new FileInputStream("template_prototype.cwtpl"))) {
+			
+			template = (Template)inStream.readObject();
+			boardFX.make((new EditableBoard(template.getRowSize(), template.getColSize())));
+			template.loadBlackAndClue(boardFX);
+			
+		} catch (IOException e)	{
+			System.out.println("Exception during deserialization: " + e);
+		}
+		
+	}
+//---------------------------------------------------------
+	public static void exportGame(BoardFX boardFX) {
+		try (ObjectOutputStream outStream = 
+				new ObjectOutputStream(new FileOutputStream("demo.cw"))) {
+
+			outStream.writeObject((Board)boardFX.editableBoard);
+
+		} catch (IOException e) {
+			System.out.println("Exception during serialization: " + e);
+		}
+	}
+	
+	public static void importGame(BoardFX boardFX) throws ClassNotFoundException {
+		Board board;
+		try (ObjectInputStream inStream 
+				= new ObjectInputStream(new FileInputStream("demo.cw"))) {
+			
+			board = (Board)inStream.readObject();
+
+			EditableBoard editableBoard = (EditableBoard)board;
+			int rowSize = editableBoard.getRowSize();
+			int colSize = editableBoard.getColSize();
+			Grid grid;
+			for (int row = 0; row < rowSize; row++) {
+				for (int col = 0; col < colSize; col++) {
+					grid = editableBoard.getGrid(row, col);
+					boardFX.add(new GridFX(boardFX, grid), col, row);
+				}
+			}
+			
+			ArrayList<Grid> numberedGrids = editableBoard.getNumberedGrids();
+			for (int index = 0; index < numberedGrids.size(); index++) {
+				grid = numberedGrids.get(index);
+				Editor.setClueNumber(boardFX.getGridFX(grid), index + 1);
+			}
+			
+		} catch (IOException e)	{
+			System.out.println("Exception during deserialization: " + e);
+		}
+		
+	}
 //---------------------------------------------------------
 	public static void clearBoard(BoardFX boardFX) {
 		int rowSize = boardFX.getRowSize();
 		int colSize = boardFX.getColSize();
 		for (int row = 0; row < rowSize; row++) {
 			for (int col = 0; col < colSize; col++) {
-				boardFX.gridFXs[row][col].setText('\0');
+				boardFX.gridFXs[row][col].setText("");
 			}
 		}
 	}
 	
 	public static void restore(GridFX gridFX) {
-		gridFX.setText('\0');
+		gridFX.setText("");
 		removeClueNumberIfAny(gridFX);
 		if (gridFX.isBlack()) {
 			Editor.unblacken(gridFX);
@@ -128,7 +180,7 @@ public class Editor {
 //---------------------------------------------------------
 	public static void blacken(GridFX gridFX) {
 		gridFX.rec.setFill(Color.BLACK);
-		gridFX.setText('\0');
+		gridFX.setText("");
 		Editor.removeClueNumberIfAny(gridFX);
 		gridFX.grid.setBlack(true);
 	}
@@ -223,64 +275,68 @@ public class Editor {
 		gridFX.rec.setStrokeWidth(1.0);
 		gridFX.rec.setStroke(Color.BLACK);
 	}
+
 //---------------------------------------------------------	
-		protected static void highlight(GridFX gridFX) {
-			gridFX.rec.setFill(lg);
-		}
+//	protected static void highlight(GridFX gridFX) {
+//		gridFX.rec.setFill(lg);
+//	}
+//
+//	protected static void unhighlight(GridFX gridFX) {
+//		gridFX.rec.setFill(Color.TRANSPARENT);
+//	}
 
-		protected static void unhighlight(GridFX gridFX) {
-			gridFX.rec.setFill(Color.TRANSPARENT);
-		}
 //--------------------------------------------------------	
-	protected static void highlight(BoardFX boardFX, Word word) {
-		
-		if (BoardFX.lastHighlighted != word) {
-			if (BoardFX.lastHighlighted != null) {
-				for (Grid grid : BoardFX.lastHighlighted.getGridArray()) {
-					unhighlight(boardFX.gridFXs[grid.getGridRow()][grid.getGridCol()]);
-				}
-			}
 	
-			BoardFX.lastHighlighted = word;
-			BoardFX.lastHighlightOrien = word.getOrien();
-			for (Grid grid : BoardFX.lastHighlighted.getGridArray()) {
-				highlight(boardFX.gridFXs[grid.getGridRow()][grid.getGridCol()]);
-			}
-		}
-		
-	}
+//	protected static void highlight(BoardFX boardFX, Word word) {
+//
+//		if (BoardFX.lastHighlighted != word) {
+//			if (BoardFX.lastHighlighted != null) {
+//				for (Grid grid : BoardFX.lastHighlighted.getGridArray()) {
+//					unhighlight(boardFX.gridFXs[grid.getGridRow()][grid.getGridCol()]);
+//				}
+//			}
+//
+//			BoardFX.lastHighlighted = word;
+//			BoardFX.lastHighlightOrien = word.getOrien();
+//			for (Grid grid : BoardFX.lastHighlighted.getGridArray()) {
+//				highlight(boardFX.gridFXs[grid.getGridRow()][grid.getGridCol()]);
+//			}
+//		}
+//
+//	}
+//	
+//	protected static void unHighlight(BoardFX boardFX) {
+//		
+//		if (BoardFX.lastHighlighted != null) {
+//			for (Grid grid : BoardFX.lastHighlighted.getGridArray()) {
+//				unhighlight(boardFX.gridFXs[grid.getGridRow()][grid.getGridCol()]);
+//			}
+//		}
+//		BoardFX.lastHighlighted = null;
+//		BoardFX.lastHighlightOrien = Orientation.INVALID;
+//
+//	}
+//	
+//	protected static void changeHighlightOrien(BoardFX boardFX) {
+//		Word word = null;
+//
+//		switch (BoardFX.lastHighlightOrien) {
+//		case HORIZONTAL:
+//			word = boardFX.getFocusedGrid().grid.getVWord();
+//			break;
+//		case VERTICAL:
+//			word = boardFX.getFocusedGrid().grid.getHWord();
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		if (word != null) {
+//			highlight(boardFX, word);
+//
+//		}
+//	}
 	
-	protected static void unHighlight(BoardFX boardFX) {
-		
-		if (BoardFX.lastHighlighted != null) {
-			for (Grid grid : BoardFX.lastHighlighted.getGridArray()) {
-				unhighlight(boardFX.gridFXs[grid.getGridRow()][grid.getGridCol()]);
-			}
-		}
-		BoardFX.lastHighlighted = null;
-		BoardFX.lastHighlightOrien = Orientation.INVALID;
-
-	}
-	
-	protected static void changeHighlightOrien(BoardFX boardFX) {
-		Word word = null;
-
-		switch (BoardFX.lastHighlightOrien) {
-		case HORIZONTAL:
-			word = boardFX.getFocusedGrid().grid.getVWord();
-			break;
-		case VERTICAL:
-			word = boardFX.getFocusedGrid().grid.getHWord();
-			break;
-		default:
-			break;
-		}
-
-		if (word != null) {
-			highlight(boardFX, word);
-
-		}
-	}
 //----------------------------MULTIPLE GRID SELECTION-------------------------------
 	protected static boolean shiftSelect(GridFX start, GridFX end) {
 		if (start.getBoardFX() != end.getBoardFX()) {
@@ -330,44 +386,34 @@ public class Editor {
 	}
 	
 	protected static void select(GridFX gridFX) {
-		Editor.highlight(gridFX);
 		gridFX.boardFX.multiselectedGrids.add(gridFX);
-		gridFX.isSelected = true;
+		gridFX.isSelected.set(true);;
 	}
 	
 	protected static void ctrlSelect(GridFX gridFX) {
 		GridFX focus = gridFX.boardFX.getFocusedGrid();
-		if (!focus.isSelected) {
+		if (!focus.isSelected()) {
 			Editor.select(focus);
 		}
 		Editor.select(gridFX);
 		Editor.unfocus(gridFX);
 		gridFX.boardFX.requestFocus();
 	}
-	
+
 	protected static void deSelect(GridFX gridFX) {
-		if (gridFX.isBlack()) 
-			gridFX.rec.setFill(Color.BLACK);
-		else 
-			Editor.unhighlight(gridFX);
-	
 		gridFX.boardFX.multiselectedGrids.remove(gridFX);
-		gridFX.isSelected = false;
+		gridFX.isSelected.set(false);
 	}
-	
+
 	protected static void deSelectAll(BoardFX boardFX) {
 		for (GridFX g : boardFX.multiselectedGrids) {
-			if (g.isBlack()) 
-				g.rec.setFill(Color.BLACK);
-			else 
-				Editor.unhighlight(g);
-			g.isSelected = false;
+			g.isSelected.set(false);
 		}
 		boardFX.multiselectedGrids = new ArrayList<GridFX>();
 	}
 	
 //----------------------------------------------------------------------
-	private static Word extractWordFromSelectedGrids(BoardFX boardFX) throws EmptyGridException {
+	private static ExtractedWord extractWordFromSelectedGrids(BoardFX boardFX) throws EmptyGridException {
 		ArrayList<GridFX> grids = boardFX.multiselectedGrids;
 		Collections.sort(grids);
 		
@@ -413,11 +459,7 @@ public class Editor {
 		else 
 			return null;
 		
-		Word extractedWord = new Word(word);
-		extractedWord.setColIndex(col);
-		extractedWord.setOrien(orien);
-		extractedWord.setRowIndex(row);
-		return extractedWord;
+		return new ExtractedWord(word, row, col, orien);
 	
 	}
 	
@@ -428,10 +470,13 @@ public class Editor {
 		} else {
 
 			try {
-				Word extractedWord = Editor.extractWordFromSelectedGrids(boardFX);
-				if (extractedWord != null) {
-					boardFX.editableBoard.placeWord(extractedWord, extractedWord.getRowIndex(),
-							extractedWord.getColIndex(), extractedWord.getOrien());
+				ExtractedWord extractedWord = Editor.extractWordFromSelectedGrids(boardFX);
+				if (extractedWord == null ) {
+					Editor.setInfo(InfoMessageEng.NO_ACTION + " " + InfoMessageEng.MISSING_PARAMETERS);
+				} else if(extractedWord.getWord().isEmpty()) {
+					throw new EmptyWordException();
+				} else {
+					boardFX.editableBoard.placeWord(extractedWord);
 					Editor.setInfo(extractedWord.getWord() + " " + InfoMessageEng.WORD_ADDED + " "
 							+ InfoMessageEng.CLUE_NUMBER_REMINDER);
 					return true;
@@ -440,9 +485,47 @@ public class Editor {
 				Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
 			} catch (EmptyGridException e) {
 				Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+			} catch (EmptyWordException e) {
+				Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+			} catch (IndexOutOfBoundsException e) {
+				Editor.setInfo(InfoMessageEng.FAILED + " " + InfoMessageEng.INDEX_OUT_OF_BOUNDS);
+			} catch (BlackGridException e) {
+				Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+			} catch (Exception e) {
+				Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
 			}
 			return false;
 		}
 	}
-		
+	
+	public static boolean addWordFromPrompt(ExtractedWord extractedWord, BoardFX boardFX) throws Exception {
+		try {
+			if (extractedWord == null) {
+				Editor.setInfo(InfoMessageEng.NO_ACTION + " " + InfoMessageEng.MISSING_PARAMETERS);
+			} else if (extractedWord.getWord().isEmpty()) {
+				throw new EmptyWordException();
+			} else {
+				boardFX.editableBoard.placeWord(extractedWord);
+				Editor.setInfo(extractedWord.getWord() + " " + InfoMessageEng.WORD_ADDED + " "
+						+ InfoMessageEng.CLUE_NUMBER_REMINDER);
+				return true;
+			}
+		} catch (GridAddedElsewhereException e) {
+			Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+		} catch (EmptyWordException e) {
+			Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+		} catch (IndexOutOfBoundsException e) {
+			Editor.setInfo(InfoMessageEng.FAILED + " " + InfoMessageEng.INDEX_OUT_OF_BOUNDS);
+		} catch (BlackGridException e) {
+			Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+		} catch (Exception e) {
+			Editor.setInfo(InfoMessageEng.FAILED + " " + e.getMessage());
+		}
+		return false;
+	}
+
+
+//----------------------------------------------------------------------
+	
+//----------------------------------------------------------------------
 }

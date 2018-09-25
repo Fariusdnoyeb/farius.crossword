@@ -1,10 +1,17 @@
 package main.java.game;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class Grid {
 //-----------------DATA MEMBERS---------------------------
 	public static final int INVALID = -1;
 	
-	private char content;
+	private final BooleanProperty isAdded = new SimpleBooleanProperty(this, "isAdded", false);
+	private final StringProperty content = new SimpleStringProperty(this, "content", "");
+//	private char content;
 	private boolean isBlack;
 	
 	private int gridRow; //row index on board
@@ -20,13 +27,25 @@ public class Grid {
 	public Grid(Board board, int row, int col) {
 		vWord = hWord = null;
 		vIndex = hIndex = INVALID;
-		content = '\0';
 
 		this.board = board;
 		gridRow = row;
 		gridCol = col;
+		isBlack = false;
 	}
 //------------------INSTANCE METHODS-----------------------
+	public boolean isAdded() {
+		return this.isAdded.get();
+	}
+	
+	public BooleanProperty addedProperty() {
+		return this.isAdded;
+	}
+	
+	public void setAdded(boolean isAdded) {
+		this.isAdded.set(isAdded);
+	}
+	
 	public int getGridRow() {
 		return this.gridRow;
 	}
@@ -43,12 +62,15 @@ public class Grid {
 		this.isBlack = isBlack;
 	}
 	
-	public char getContent() {
-		return this.content;
+	public String getContent() {
+		return this.content.get();
 	}
 	
-	public void setContent(char character) {
-		this.content = Character.toUpperCase(character);
+	public StringProperty getContentProperty() {
+		return this.content;
+	}
+	public void setContent(String character) {
+		this.content.set(character.toUpperCase());
 	}
 	
 	public Word getHWord() {
