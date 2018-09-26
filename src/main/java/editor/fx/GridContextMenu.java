@@ -2,9 +2,6 @@ package main.java.editor.fx;
 
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyCodeCombination;
 
 public class GridContextMenu extends ContextMenu{
 	private MenuItem blacken;

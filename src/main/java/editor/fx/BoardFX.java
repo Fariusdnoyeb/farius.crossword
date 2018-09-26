@@ -34,6 +34,7 @@ public class BoardFX extends GridPane {
 		int rowSize = editableBoard.getRowSize();
 		int colSize = editableBoard.getColSize();
 		gridFXs = new GridFX[rowSize][colSize];
+		
 		GridFX gridFX;
 		for (int row = 0; row < rowSize; row++) {
 			for (int col = 0; col < colSize; col++) {
@@ -42,12 +43,13 @@ public class BoardFX extends GridPane {
 				this.add(gridFX, col, row);
 			}
 		}
-
 		Editor.focus(gridFXs[0][0]);
+		
 		this.addKeyHandler();
 		this.requestFocus();
 	}
 
+//----------------------------------------------------------
 	public EditableBoard getEditableBoard() {
 		return this.editableBoard;
 	}

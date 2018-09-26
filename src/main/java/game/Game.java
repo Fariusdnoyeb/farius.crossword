@@ -4,9 +4,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-import main.java.editor.fx.Editor;
-import main.java.editor.fx.Template;
-
 public class Game {
 	
 	public static Board loadGame() throws ClassNotFoundException {
@@ -27,6 +24,7 @@ public class Game {
 			Board board = Game.loadGame();
 			
 			System.out.println(board.toString());
+			System.out.println(board.getWords());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

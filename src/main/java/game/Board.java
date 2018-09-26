@@ -1,10 +1,15 @@
 package main.java.game;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Board {
+public class Board implements Serializable{
 //-----------------DATA MEMBERS---------------------------
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2607096484326456804L;
 	protected int rowSize;
 	protected int colSize;
 	protected ArrayList<Word> words;

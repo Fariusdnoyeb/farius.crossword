@@ -9,13 +9,13 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
+
 import main.java.editor.ExtractedWord;
 import main.java.editor.fx.AddWordPrompt;
 import main.java.editor.fx.BoardFX;
@@ -27,7 +27,7 @@ import main.java.editor.fx.InfoMessageEng;
 import main.java.editor.fx.InputHandler;
 import main.java.editor.fx.UserInput;
 import main.java.editor.fx.UserInputMode;
-import main.java.game.Word;
+
 
 public class MainController {
 	
@@ -101,17 +101,19 @@ public class MainController {
 	
 	@FXML private void print() {
 		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		System.out.println(boardFX.getEditableBoard().getWords().toString());
 		System.out.println(boardFX.getEditableBoard().toString());
+		System.out.println(boardFX.getEditableBoard().getWords().size());
 	}
 	
-	private void addMouseEventEnterAndExit(Node node, String infoMessage) {
-		node.setOnMouseEntered(e -> {
-			Editor.setInfo(infoMessage);
-		});
-		node.setOnMouseExited(e -> {
-			Editor.clearInfo();
-		});
-	}
+//	private void addMouseEventEnterAndExit(Node node, String infoMessage) {
+//		node.setOnMouseEntered(e -> {
+//			Editor.setInfo(infoMessage);
+//		});
+//		node.setOnMouseExited(e -> {
+//			Editor.clearInfo();
+//		});
+//	}
 
 	@FXML private void closeSelectedTab() {
 		tabPane.getTabs().remove(selectedTab);
@@ -190,3 +192,17 @@ public class MainController {
 		Editor.exportGame(boardFX);
 	}
 }
+
+//private  transient BooleanProperty isAdded = new SimpleBooleanProperty(this, "isAdded", false);
+//private  transient StringProperty content = new SimpleStringProperty(this, "content", "");
+////private char content;
+//private boolean isBlack;
+//
+//private int gridRow; //row index on board
+//private int gridCol; //col index on board
+//private Board board;
+//
+//private Word vWord; //vertical
+//private Word hWord; //horizontal
+//private int vIndex; //index in vWord
+//private int hIndex; //index in hWord

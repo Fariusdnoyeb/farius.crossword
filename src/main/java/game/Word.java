@@ -1,9 +1,16 @@
 package main.java.game;
 
-public class Word implements Comparable<Word>{
+import java.io.Serializable;
+
+public class Word implements Comparable<Word>, Serializable{
 	
 //-----------------DATA MEMBERS----------------------------
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3583996444114447026L;
+
 	private static Sort sortType = Sort.BY_LENGTH_REVERSE;
 	
 	private String clue;

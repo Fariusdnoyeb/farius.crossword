@@ -3,14 +3,17 @@ package main.java.editor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Stack;
 
 import main.java.editor.exception.BlackGridException;
 import main.java.editor.exception.GridAddedElsewhereException;
 import main.java.game.*;
 
 public class EditableBoard extends Board{
-//-----------------DATA MEMBERS---------------------------	
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7835164528148619993L;
+	//-----------------DATA MEMBERS---------------------------	
 	private HashMap<Character, ArrayList<Grid>> gridToCharMap;
 
 // -------------------CONSTRUCTORS--------------------------

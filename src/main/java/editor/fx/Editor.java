@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -16,13 +15,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import main.java.editor.*;
 import main.java.editor.exception.BlackGridException;
@@ -111,8 +108,8 @@ public class Editor {
 	public static void exportGame(BoardFX boardFX) {
 		try (ObjectOutputStream outStream = 
 				new ObjectOutputStream(new FileOutputStream("demo.cw"))) {
-
-			outStream.writeObject((Board)boardFX.editableBoard);
+			Board board =(Board)boardFX.editableBoard;
+			outStream.writeObject(board);
 
 		} catch (IOException e) {
 			System.out.println("Exception during serialization: " + e);
@@ -120,23 +117,17 @@ public class Editor {
 	}
 	
 	public static void importGame(BoardFX boardFX) throws ClassNotFoundException {
-		Board board;
+		
 		try (ObjectInputStream inStream 
 				= new ObjectInputStream(new FileInputStream("demo.cw"))) {
-			
+			Board board;
 			board = (Board)inStream.readObject();
 
 			EditableBoard editableBoard = (EditableBoard)board;
-			int rowSize = editableBoard.getRowSize();
-			int colSize = editableBoard.getColSize();
-			Grid grid;
-			for (int row = 0; row < rowSize; row++) {
-				for (int col = 0; col < colSize; col++) {
-					grid = editableBoard.getGrid(row, col);
-					boardFX.add(new GridFX(boardFX, grid), col, row);
-				}
-			}
+
+			boardFX.make(editableBoard);
 			
+			Grid grid;
 			ArrayList<Grid> numberedGrids = editableBoard.getNumberedGrids();
 			for (int index = 0; index < numberedGrids.size(); index++) {
 				grid = numberedGrids.get(index);
@@ -244,7 +235,7 @@ public class Editor {
 	
 	public static boolean removeClueNumberIfAny(GridFX gridFX) {
 		try {
-			ObservableList childrens = gridFX.getChildren();
+			ObservableList<Node> childrens = gridFX.getChildren();
 			int size = childrens.size();
 			if (size == 3) {
 				childrens.remove(size - 1);

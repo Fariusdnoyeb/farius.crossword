@@ -1,17 +1,26 @@
 package main.java.game;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class Grid {
+public class Grid implements Externalizable{
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4435296803480407561L;
+
 //-----------------DATA MEMBERS---------------------------
 	public static final int INVALID = -1;
 	
-	private final BooleanProperty isAdded = new SimpleBooleanProperty(this, "isAdded", false);
-	private final StringProperty content = new SimpleStringProperty(this, "content", "");
-//	private char content;
+	private  transient BooleanProperty isAdded = new SimpleBooleanProperty(this, "isAdded", false);
+	private  transient StringProperty content = new SimpleStringProperty(this, "content", "");
 	private boolean isBlack;
 	
 	private int gridRow; //row index on board
@@ -33,6 +42,8 @@ public class Grid {
 		gridCol = col;
 		isBlack = false;
 	}
+	
+	public Grid() {};
 //------------------INSTANCE METHODS-----------------------
 	public boolean isAdded() {
 		return this.isAdded.get();
@@ -103,5 +114,48 @@ public class Grid {
 	}
 
 //---------------------------------------------------------
+//	private void writeObject(ObjectOutputStream outStream) throws IOException {
+//		outStream.defaultWriteObject();
+////		outStream.writeUTF(content.get());
+//		outStream.writeBoolean(isAdded.get());
+//	}
+//	private void readObject(ObjectInputStream inStream) throws IOException, ClassNotFoundException {
+//		inStream.defaultReadObject();
+////		content.set(inStream.readUTF());
+//		isAdded.set(inStream.readBoolean());
+//	}
 	
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(board);
+		out.writeObject(vWord);
+		out.writeObject(hWord);
+		
+		out.writeInt(gridRow);
+		out.writeInt(gridCol);
+		out.writeInt(vIndex);
+		out.writeInt(hIndex);
+		
+		out.writeBoolean(isBlack);
+		
+		out.writeUTF(content.get());
+		out.writeBoolean(isAdded.get());
+	}
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		board = (Board)in.readObject();
+		vWord = (Word)in.readObject();
+		hWord = (Word)in.readObject();
+		
+		gridRow = in.readInt();
+		gridCol = in.readInt();
+		vIndex = in.readInt();
+		hIndex = in.readInt();
+		
+		isBlack = in.readBoolean();
+		
+		content.set(in.readUTF());
+		isAdded.set(in.readBoolean());
+		
+	}
 }

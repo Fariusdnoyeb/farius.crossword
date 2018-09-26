@@ -2,7 +2,6 @@ package main.java.editor.fx;
 
 import java.io.IOException;
 
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,9 +13,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
 import main.java.editor.ExtractedWord;
 import main.java.game.Orientation;
-import main.java.game.Word;
+
 
 public class AddWordPrompt extends VBox{
 	

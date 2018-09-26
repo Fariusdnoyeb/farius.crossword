@@ -51,6 +51,9 @@ public class GridFX extends StackPane implements Comparable<GridFX>{
 		if (grid.isBlack()) {
 			Editor.blacken(this);
 		}
+		if (grid.isAdded()) {
+			rec.setFill(Color.LIGHTGREY);
+		}
 	
 		this.setOnContextMenuRequested(event -> {
 			if (!this.boardFX.isMultiSelected()) {
