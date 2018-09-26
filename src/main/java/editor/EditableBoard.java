@@ -3,12 +3,17 @@ package main.java.editor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Stack;
 
+import main.java.editor.exception.BlackGridException;
+import main.java.editor.exception.GridAddedElsewhereException;
 import main.java.game.*;
 
 public class EditableBoard extends Board{
-//-----------------DATA MEMBERS---------------------------	
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7835164528148619993L;
+	//-----------------DATA MEMBERS---------------------------	
 	private HashMap<Character, ArrayList<Grid>> gridToCharMap;
 
 // -------------------CONSTRUCTORS--------------------------
@@ -30,20 +35,26 @@ public class EditableBoard extends Board{
 		
 		}
 //------------------INSTANCE METHODS-----------------------
-	public boolean placeWord(Word word, int row, int col, Orientation orien) {
-		if (word == null ||
-				 row < 0 || row > rowSize ||
-				 col < 0 || col > colSize ||
-				 (orien != Orientation.HORIZONTAL  && orien != Orientation.VERTICAL)) {
-					 return false;
-				 }
-		String wordStr = word.getWord();
+	public boolean placeWord(ExtractedWord extractedWord) throws Exception {
+		Word word = new Word(extractedWord.getLength());
+		return placeWord(word, extractedWord.getWord(), extractedWord.getRow(), extractedWord.getCol(), extractedWord.getOrien());
+	}
+	private boolean placeWord(Word word, String wordStr, int row, int col, Orientation orien) throws Exception {
+		if (word == null || orien == Orientation.INVALID) {
+			return false;
+		} else if ( row < 0 || row > rowSize ||
+				 col < 0 || col > colSize) {
+			throw new IndexOutOfBoundsException();
+		}
+		
 		int length = word.getLength();
 		int cursor;
 		int index = 0;
 		char charPlaced;
-		Grid grid;		
 		
+		Grid[] grids = new Grid[length];
+		String[] contents = new String[length]; 
+		Grid grid;		
 		switch(orien) {
 		case HORIZONTAL:
 			cursor = col;
@@ -51,6 +62,11 @@ public class EditableBoard extends Board{
 				charPlaced = wordStr.charAt(index);
 				grid = this.board[row][cursor];
 				
+				if (grid.getHWord() != null)
+					throw new GridAddedElsewhereException();
+				if (grid.isBlack())
+					throw new BlackGridException();
+					
 				if (gridToCharMap.get(charPlaced) == null) {
 					ArrayList<Grid> gridList = new ArrayList<Grid>();
 					gridList.add(grid);
@@ -58,9 +74,8 @@ public class EditableBoard extends Board{
 				} else {
 					gridToCharMap.get(charPlaced).add(grid);
 				}
-				grid.setContent(charPlaced);
-				grid.setWord(word, index, orien);
-				word.setGrid(grid, index);
+				contents[index] = Character.toString(charPlaced);
+				grids[index] = grid;
 				index++;
 				cursor++;
 			}
@@ -69,7 +84,10 @@ public class EditableBoard extends Board{
 			while (index < length) {
 				charPlaced = wordStr.charAt(index);
 				grid = this.board[cursor][col];
-				
+				if (grid.getVWord() != null)
+					throw new GridAddedElsewhereException();
+				if (grid.isBlack())
+					throw new BlackGridException();
 				if (gridToCharMap.get(charPlaced) == null) {
 					ArrayList<Grid> gridList = new ArrayList<Grid>();
 					gridList.add(grid);
@@ -77,9 +95,8 @@ public class EditableBoard extends Board{
 				} else {
 					gridToCharMap.get(charPlaced).add(grid);
 				}
-				grid.setContent(charPlaced);
-				grid.setWord(word, index, orien);
-				word.setGrid(grid, index);
+				contents[index] = Character.toString(charPlaced);
+				grids[index] = grid;
 				index++;
 				cursor++;
 			}
@@ -90,12 +107,20 @@ public class EditableBoard extends Board{
 		word.setRowIndex(row);
 		word.setColIndex(col);
 		word.setOrien(orien);
+		index = 0;
+		for (; index < length; index++) {
+			grids[index].setContent(contents[index]);
+			grids[index].setWord(word, index, orien);
+			word.setGrid(grids[index], index);
+		}
+		
+
 		words.add(word);
 		
 		return true;
-	
 	}
 	
+
 	public ArrayList<Grid> getNumberedGrids() {
 		Word.setSortType(Sort.BY_POS);
 		ArrayList<Word> wordList = new ArrayList<Word>();
@@ -129,14 +154,15 @@ public class EditableBoard extends Board{
 		 * @param word : (of type Word)
 		 * @return true if placed successfully,
 		 *		   false if failed to place.
+		 * @throws GridAddedElsewhereException 
 		 */
-		protected boolean placeAtCenter(Word word) {
-			int length = word.getLength();
-			int col = (this.colSize - length) / 2 + 1;
-			int row = this.rowSize / 2;
-			return (placeWord(word, row, col - 1, Orientation.HORIZONTAL));
-		}
-		
+//		protected boolean placeAtCenter(Word word) throws GridAddedElsewhereException {
+//			int length = word.getLength();
+//			int col = (this.colSize - length) / 2 + 1;
+//			int row = this.rowSize / 2;
+//			return (placeWord(word, row, col - 1, Orientation.HORIZONTAL));
+//		}
+//		
 		/**
 		 * Pseudo:
 		 * <ul>
@@ -150,34 +176,35 @@ public class EditableBoard extends Board{
 		 * (to preserve length priority).</li>
 		 * </ul> 
 		 * @param wordBank list of words to place onto board.
+		 * @throws GridAddedElsewhereException 
 		 */
-		public void placeList(ArrayList<Word> wordBank) {
-			Collections.sort(wordBank); //sorts by length. Longest first.
-			
-			Word currentW;
-			currentW = wordBank.get(0);
-			this.placeWord(currentW, 2, 0, Orientation.HORIZONTAL);
-			
-			Stack<Word> workingS = new Stack<Word>();
-			for (int i = wordBank.size() - 1; i > 0; i--) {
-				workingS.push(wordBank.get(i));			
-			}
-			
-			Stack<Word> remainS = new Stack<Word>();
-			while (!workingS.isEmpty()) {
-				currentW = workingS.pop();
-				if (tryPlaceWordToBestPos(currentW)) {
-					if (!remainS.isEmpty()) {
-						while (!remainS.isEmpty()) {
-							workingS.push(remainS.pop());
-						}
-						continue;
-					}
-				} else {
-					remainS.push(currentW);
-				}
-			}
-		}
+//		public void placeList(ArrayList<Word> wordBank) throws GridAddedElsewhereException {
+//			Collections.sort(wordBank); //sorts by length. Longest first.
+//			
+//			Word currentW;
+//			currentW = wordBank.get(0);
+//			this.placeWord(currentW, 2, 0, Orientation.HORIZONTAL);
+//			
+//			Stack<Word> workingS = new Stack<Word>();
+//			for (int i = wordBank.size() - 1; i > 0; i--) {
+//				workingS.push(wordBank.get(i));			
+//			}
+//			
+//			Stack<Word> remainS = new Stack<Word>();
+//			while (!workingS.isEmpty()) {
+//				currentW = workingS.pop();
+//				if (tryPlaceWordToBestPos(currentW)) {
+//					if (!remainS.isEmpty()) {
+//						while (!remainS.isEmpty()) {
+//							workingS.push(remainS.pop());
+//						}
+//						continue;
+//					}
+//				} else {
+//					remainS.push(currentW);
+//				}
+//			}
+//		}
 		
 		/**
 		 * tries placing a Word instance to the best
@@ -185,19 +212,20 @@ public class EditableBoard extends Board{
 		 * @param word
 		 * @return true if placed successfully,
 		 * 			false if fails to place.
+		 * @throws GridAddedElsewhereException 
 		 */
-		protected boolean tryPlaceWordToBestPos(Word word) {
-			final int	HORIZONTAL	= 0;
-//			final int	VERTICAL		= 1;	
-			int[] sugCoor = findBestPos(word);
-			if (sugCoor == null) {
-				return false;
-			} else {
-				Orientation orien = (sugCoor[3] == HORIZONTAL) ? (Orientation.HORIZONTAL) : (Orientation.VERTICAL);
-				placeWord(word, sugCoor[1], sugCoor[2], orien);
-				return true;
-			}
-		}
+//		protected boolean tryPlaceWordToBestPos(Word word) throws GridAddedElsewhereException {
+//			final int	HORIZONTAL	= 0;
+////			final int	VERTICAL		= 1;	
+//			int[] sugCoor = findBestPos(word);
+//			if (sugCoor == null) {
+//				return false;
+//			} else {
+//				Orientation orien = (sugCoor[3] == HORIZONTAL) ? (Orientation.HORIZONTAL) : (Orientation.VERTICAL);
+//				placeWord(word, sugCoor[1], sugCoor[2], orien);
+//				return true;
+//			}
+//		}
 		
 		/**
 		 * 
@@ -208,28 +236,28 @@ public class EditableBoard extends Board{
 		 * @param word
 		 * @return
 		 */
-		protected int[] findBestPos(Word word) {
-			String currentStr = word.getWord();
-//			ArrayList<Integer[]> sugPosList;
-			ArrayList<Grid> sugGridList;
-			int[] sugCoor = null;
-			int rank = -1;
-			for (int i = 0; i < currentStr.length(); i++) {
-//				sugPosList = posMap.get(currentStr.charAt(i));
-				sugGridList = gridToCharMap.get(currentStr.charAt(i));
-				if (sugGridList == null) continue;
-				int[] temp;
-				for (int j = 0; j < sugGridList.size(); j++) {
-					temp = numIntersect(word, i, sugGridList.get(j));
-					if (temp[0] > rank) {
-						rank = temp[0];
-						sugCoor = temp;
-					}
-					
-				}
-			}
-			return (rank < 0) ? (null) : (sugCoor);
-		}
+//		protected int[] findBestPos(Word word) {
+//			String currentStr = word.getWord();
+////			ArrayList<Integer[]> sugPosList;
+//			ArrayList<Grid> sugGridList;
+//			int[] sugCoor = null;
+//			int rank = -1;
+//			for (int i = 0; i < currentStr.length(); i++) {
+////				sugPosList = posMap.get(currentStr.charAt(i));
+//				sugGridList = gridToCharMap.get(currentStr.charAt(i));
+//				if (sugGridList == null) continue;
+//				int[] temp;
+//				for (int j = 0; j < sugGridList.size(); j++) {
+//					temp = numIntersect(word, i, sugGridList.get(j));
+//					if (temp[0] > rank) {
+//						rank = temp[0];
+//						sugCoor = temp;
+//					}
+//					
+//				}
+//			}
+//			return (rank < 0) ? (null) : (sugCoor);
+//		}
 		
 		/**
 		 * finds the number of intersections with other words at suggested
@@ -253,7 +281,7 @@ public class EditableBoard extends Board{
 			int[] ver = {sugGrid.getGridRow() - letterIndex, sugGrid.getGridCol()};
 			int length = word.getLength();
 			int cursor, stop;
-			char boardChar, wordChar;
+			String boardChar, wordChar;
 			int row, col;
 			//Horizontal Tests
 			int numH = 0;
@@ -268,8 +296,8 @@ public class EditableBoard extends Board{
 						break;
 					}
 					boardChar = this.board[row][cursor].getContent(); 
-					wordChar = word.getWord().charAt(i);
-					if (boardChar != '\0') {
+					wordChar = Character.toString( word.getWord().charAt(i) );
+					if (boardChar != "") {
 						if (boardChar == wordChar) {
 							numH++;
 						} else {
@@ -295,8 +323,8 @@ public class EditableBoard extends Board{
 						break;
 					}
 					boardChar = this.board[cursor][col].getContent(); 
-					wordChar = word.getWord().charAt(i);
-					if (boardChar != '\0') {
+					wordChar = Character.toString( word.getWord().charAt(i) );
+					if (boardChar != "") {
 						if (boardChar == wordChar) {
 							numV++;
 						} else {

@@ -4,7 +4,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Template implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -602344054877657595L;
+
 	static class Coordinate implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7301415089026872670L;
 		private int row;
 		private int col;
 		

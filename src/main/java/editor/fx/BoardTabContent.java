@@ -1,8 +1,6 @@
 package main.java.editor.fx;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -51,41 +49,37 @@ public class BoardTabContent extends AnchorPane{
 	}
 	
 	public void loadTempalte() throws Exception{
-		Template template;
-		try (ObjectInputStream inStream 
-				= new ObjectInputStream(new FileInputStream("template_prototype.cwtpl"))) {
-			template = (Template)inStream.readObject();
-			
-			Editor.loadTemplate(template,boardFX);
-			
-		} catch (IOException e)	{
-			System.out.println("Exception during deserialization: " + e);
-		}
-	
-		makeIndices();
+
+		Editor.loadTemplate(boardFX);
+		prepareUI();
+		Editor.clearInfo();
 		
-		this.center(boardScrollPane.getViewportBounds(), boardVBox);
-		boardScrollPane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
-			this.center(newValue, boardVBox);
-		});
+	}
+	
+	public void importGame() throws Exception {
+		
+		Editor.importGame(boardFX);
+		prepareUI();
+		Editor.clearInfo();
 		
 	}
 	
 	public void makeBoard() {
 		boardFX.make(new EditableBoard(15,15));
-		
+		prepareUI();
+		Editor.clearInfo();
+	}
+	
+//-----------------------------------------------------------------------------------------			
+	private void prepareUI() {
 		makeIndices();
 		
 		this.center(boardScrollPane.getViewportBounds(), boardVBox);
 		boardScrollPane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
 			this.center(newValue, boardVBox);
 		});
-	}
-	
-	public void saveAsTemplate() {
 		
 	}
-	
 //-----------------------------------------------------------------------------------------	
 	private StackPane generateIndex(int i) {
 		Label label= new Label();

@@ -1,10 +1,15 @@
 package main.java.game;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Board {
+public class Board implements Serializable{
 //-----------------DATA MEMBERS---------------------------
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2607096484326456804L;
 	protected int rowSize;
 	protected int colSize;
 	protected ArrayList<Word> words;
@@ -30,14 +35,14 @@ public class Board {
 	@Override
 	public String toString() {
 		String retVal = "";
-		char gridChar;
+		String gridChar;
 		for (int row = 0; row <rowSize; row++) {
 			for (int col = 0; col < colSize; col++) {
 				gridChar = board[row][col].getContent();
-				if (gridChar == '\0') {
+				if (gridChar == "") {
 					retVal = retVal + "-";
 				}else {
-					retVal = retVal + Character.toString(gridChar);
+					retVal = retVal + gridChar;
 				}
 			}
 			retVal = retVal + '\n';

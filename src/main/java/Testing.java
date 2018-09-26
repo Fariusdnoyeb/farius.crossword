@@ -1,26 +1,16 @@
 package main.java;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
-import java.util.ArrayList;
-
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+
 import javafx.scene.Scene;
-import javafx.scene.control.TextField;
+
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
+
 import javafx.stage.Stage;
 
-import main.java.editor.EditableBoard;
+
 import main.java.editor.fx.BoardFX;
-import main.java.editor.fx.Editor;
-import main.java.editor.fx.Template;
+
 
 
 public class Testing extends Application {
@@ -156,17 +146,17 @@ public class Testing extends Application {
 		
 		
 //Loading template		
-		
-		Template template;
-		try (ObjectInputStream inStream 
-				= new ObjectInputStream(new FileInputStream("template_prototype.cwtpl"))) {
-			
-			template = (Template)inStream.readObject();
-			Editor.loadTemplate(template, boardFX);
-			
-		} catch (IOException e)	{
-			System.out.println("Exception during deserialization: " + e);
-		}
+//		
+//		Template template;
+//		try (ObjectInputStream inStream 
+//				= new ObjectInputStream(new FileInputStream("template_prototype.cwtpl"))) {
+//			
+//			template = (Template)inStream.readObject();
+//			Editor.loadTemplate(template, boardFX);
+//			
+//		} catch (IOException e)	{
+//			System.out.println("Exception during deserialization: " + e);
+//		}
 		
 		
 //Testing AI
