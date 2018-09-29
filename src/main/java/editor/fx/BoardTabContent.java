@@ -1,7 +1,9 @@
 package main.java.editor.fx;
 
+import java.io.File;
 import java.io.IOException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -48,20 +50,22 @@ public class BoardTabContent extends AnchorPane{
 		return this.boardFX;
 	}
 	
-	public void loadTempalte() throws Exception{
+	public void loadTempalte(File savedFile) throws Exception{
 
-		Editor.loadTemplate(boardFX);
-		prepareUI();
-		Editor.clearInfo();
+		if (Editor.loadTemplate(boardFX, savedFile) ) {
+			prepareUI();
+			Editor.clearInfo();	
+		}
 		
 	}
 	
-	public void importGame() throws Exception {
+	public void importGame(File savedFile) throws Exception {
 		
-		Editor.importGame(boardFX);
-		prepareUI();
-		Editor.clearInfo();
-		
+		if ( Editor.importGame(boardFX, savedFile) ) {
+			prepareUI();
+			Editor.clearInfo();
+		}
+
 	}
 	
 	public void makeBoard() {
@@ -74,10 +78,17 @@ public class BoardTabContent extends AnchorPane{
 	private void prepareUI() {
 		makeIndices();
 		
-		this.center(boardScrollPane.getViewportBounds(), boardVBox);
-		boardScrollPane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
-			this.center(newValue, boardVBox);
-		});
+		Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+        		center(boardScrollPane.getViewportBounds(), boardVBox);
+        		
+        		boardScrollPane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
+        			center(newValue, boardVBox);
+        		});
+            }
+        });
+
 		
 	}
 //-----------------------------------------------------------------------------------------	

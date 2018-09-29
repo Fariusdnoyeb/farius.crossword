@@ -16,4 +16,5 @@ public class BoardTab extends Tab{
 	public BoardTabContent getTabContent() {
 		return this.content;
 	}
+	
 }

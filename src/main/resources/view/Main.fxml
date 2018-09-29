@@ -23,9 +23,9 @@
                               <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
                         <MenuItem onAction="#loadTemplate" text="Load Template..." />
-                        <MenuItem mnemonicParsing="false" onAction="#saveAsTemplate" text="Save as Template..." />
+                        <MenuItem fx:id="saveAsTemplateMI" mnemonicParsing="false" onAction="#saveAsTemplate" text="Save as Template..." />
                         <MenuItem mnemonicParsing="false" onAction="#importGame" text="Import Game..." />
-                        <MenuItem mnemonicParsing="false" onAction="#exportGame" text="Export Game..." />
+                        <MenuItem fx:id="exportGameMI" mnemonicParsing="false" onAction="#exportGame" text="Export Game..." />
                         <MenuItem text="Exit." />
                      </items>
                   </Menu>

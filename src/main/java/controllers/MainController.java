@@ -1,5 +1,6 @@
 package main.java.controllers;
 
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 import javafx.application.Platform;
@@ -15,7 +16,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
-
+import javafx.stage.Stage;
 import main.java.editor.ExtractedWord;
 import main.java.editor.fx.AddWordPrompt;
 import main.java.editor.fx.BoardFX;
@@ -25,6 +26,7 @@ import main.java.editor.fx.Editor;
 import main.java.editor.fx.GridFX;
 import main.java.editor.fx.InfoMessageEng;
 import main.java.editor.fx.InputHandler;
+import main.java.editor.fx.Locator;
 import main.java.editor.fx.UserInput;
 import main.java.editor.fx.UserInputMode;
 
@@ -33,6 +35,9 @@ public class MainController {
 	
 	@FXML TabPane tabPane;
 	BoardTab selectedTab;
+	
+	@FXML MenuItem saveAsTemplateMI;
+	@FXML MenuItem exportGameMI;
 	
 	@FXML MenuItem closeTabMI;
 	@FXML MenuItem clearBoardMI;
@@ -48,8 +53,10 @@ public class MainController {
 	@FXML UserInput userInput;
 	
 	@FXML Button printButton;
-	private final BooleanProperty noTab = new SimpleBooleanProperty(true);
 
+	private final BooleanProperty noTab = new SimpleBooleanProperty(true);
+	private Stage stage;
+	private final Locator locator = new Locator();
 	
 	@FXML private void initialize() {
 		
@@ -67,6 +74,8 @@ public class MainController {
 
 		boardCursorStatus.disableProperty().bind(noTab);
 		
+		saveAsTemplateMI.disableProperty().bind(noTab);
+		exportGameMI.disableProperty().bind(noTab);
 		closeTabMI.disableProperty().bind(noTab);
 		clearBoardMI.disableProperty().bind(noTab);
 		setClueNumberMI.disableProperty().bind(noTab);
@@ -93,10 +102,12 @@ public class MainController {
 		currentRow.textProperty().bind(Editor.getFocusedRowIndexProperty().add(1).asString());
 		currentCol.textProperty().bind(Editor.getFocusedColIndexProperty().add(1).asString());
 		
-//		addMouseEventEnterAndExit(testButton, "test button: mouse happens");
-		
 		infoBar.textProperty().bind(Editor.getInfoProperty());
 		
+	}
+	
+	public void setStage(Stage stage) {
+		this.stage = stage;
 	}
 	
 	@FXML private void print() {
@@ -153,7 +164,7 @@ public class MainController {
 	@FXML private void addWordFromPrompt() throws Exception {
 		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
 		
-		AddWordPrompt prompt = new AddWordPrompt(boardFX.getFocusedGrid(), userInput.getScene().getWindow());
+		AddWordPrompt prompt = new AddWordPrompt(boardFX.getFocusedGrid(), this.userInput.getScene().getWindow());
 		ExtractedWord extractedWord = prompt.prompt();
 		
 		Editor.addWordFromPrompt(extractedWord, boardFX);
@@ -172,37 +183,41 @@ public class MainController {
 		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
 	}
 //-----------------------------------------------------------------
-	@FXML private void loadTemplate() throws Exception{
-		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
-		selectedTab.getTabContent().loadTempalte();
+	@FXML private void loadTemplate() throws Exception {
+		final File file = locator.getTemplate(stage.getScene().getWindow());
+		
+		if (file != null) {
+			newBoard();
+			selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
+			selectedTab.getTabContent().loadTempalte(file);
+		}
 	}
 	
 	@FXML private void saveAsTemplate() {
-		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
-		Editor.saveAsTemplate(boardFX);
+		final File file = locator.setTemplate(stage.getScene().getWindow());
+		
+		if (file != null) {
+			BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+			Editor.saveAsTemplate(boardFX, file);
+		}
 	}
 	
-	@FXML private void importGame() throws Exception	{
-		selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
-		selectedTab.getTabContent().importGame();
+	@FXML private void importGame() throws Exception {
+		final File file = locator.getGame(stage.getScene().getWindow());
+		
+		if (file != null) {
+			newBoard();
+			selectedTab = (BoardTab) tabPane.getSelectionModel().getSelectedItem();
+			selectedTab.getTabContent().importGame(file);
+		}
 	}
 	
 	@FXML private void exportGame() {
-		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
-		Editor.exportGame(boardFX);
+		final File file = locator.setGame(stage.getScene().getWindow());
+		
+		if (file != null) {
+			BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+			Editor.exportGame(boardFX, file);
+		}
 	}
 }
-
-//private  transient BooleanProperty isAdded = new SimpleBooleanProperty(this, "isAdded", false);
-//private  transient StringProperty content = new SimpleStringProperty(this, "content", "");
-////private char content;
-//private boolean isBlack;
-//
-//private int gridRow; //row index on board
-//private int gridCol; //col index on board
-//private Board board;
-//
-//private Word vWord; //vertical
-//private Word hWord; //horizontal
-//private int vIndex; //index in vWord
-//private int hIndex; //index in hWord

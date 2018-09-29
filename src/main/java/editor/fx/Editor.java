@@ -1,5 +1,6 @@
 package main.java.editor.fx;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,7 +65,8 @@ public class Editor {
 		focusedColIndex.set(gridFX.grid.getGridCol());
 	}
 //---------------------------------------------------------
-	public static void saveAsTemplate(BoardFX boardFX) {
+	public static boolean saveAsTemplate(BoardFX boardFX, File file) {
+
 		Template template = new Template(boardFX.getRowSize(), boardFX.getColSize());
 		
 		GridFX gridFX;
@@ -81,45 +83,53 @@ public class Editor {
 		}
 		
 		try (ObjectOutputStream outStream = 
-				new ObjectOutputStream(new FileOutputStream("template_prototype.cwtpl"))) {
+				new ObjectOutputStream(new FileOutputStream(file))) {
 
 			outStream.writeObject(template);
-
+			return true;
+			
 		} catch (IOException e) {
-			System.out.println("Exception during serialization: " + e);
+			e.printStackTrace();
+			return false;
 		}
 	}
-	public static void loadTemplate(BoardFX boardFX) throws ClassNotFoundException {
+	public static boolean loadTemplate(BoardFX boardFX, File file) throws ClassNotFoundException {
 		
 		Template template;
 		try (ObjectInputStream inStream 
-				= new ObjectInputStream(new FileInputStream("template_prototype.cwtpl"))) {
+				= new ObjectInputStream(new FileInputStream(file))) {
 			
 			template = (Template)inStream.readObject();
 			boardFX.make((new EditableBoard(template.getRowSize(), template.getColSize())));
 			template.loadBlackAndClue(boardFX);
+			return true;
 			
 		} catch (IOException e)	{
-			System.out.println("Exception during deserialization: " + e);
+			Editor.setInfo(InfoMessageEng.NO_ACTION + " " + InfoMessageEng.FILE_NOT_FOUND);
+			return false;
 		}
 		
 	}
 //---------------------------------------------------------
-	public static void exportGame(BoardFX boardFX) {
+	public static boolean exportGame(BoardFX boardFX, File file) {
+		
 		try (ObjectOutputStream outStream = 
-				new ObjectOutputStream(new FileOutputStream("demo.cw"))) {
+				new ObjectOutputStream(new FileOutputStream(file))) {
+			
 			Board board =(Board)boardFX.editableBoard;
 			outStream.writeObject(board);
+			return true;
 
 		} catch (IOException e) {
-			System.out.println("Exception during serialization: " + e);
+			e.printStackTrace();
+			return false;
 		}
 	}
 	
-	public static void importGame(BoardFX boardFX) throws ClassNotFoundException {
-		
+	public static boolean importGame(BoardFX boardFX, File file) throws ClassNotFoundException {
+
 		try (ObjectInputStream inStream 
-				= new ObjectInputStream(new FileInputStream("demo.cw"))) {
+				= new ObjectInputStream(new FileInputStream(file))) {
 			Board board;
 			board = (Board)inStream.readObject();
 
@@ -133,9 +143,11 @@ public class Editor {
 				grid = numberedGrids.get(index);
 				Editor.setClueNumber(boardFX.getGridFX(grid), index + 1);
 			}
+			return true;
 			
 		} catch (IOException e)	{
-			System.out.println("Exception during deserialization: " + e);
+			Editor.setInfo(InfoMessageEng.NO_ACTION + " " + InfoMessageEng.FILE_NOT_FOUND);
+			return false;
 		}
 		
 	}

@@ -31,4 +31,7 @@ public class InfoMessageEng {
 	public static final String MISSING_PARAMETERS = "Some parameters might be missing.";
 	
 	public static final String INDEX_OUT_OF_BOUNDS = "At least one of the indices is out of bound.";
+	
+	public static final String FILE_NOT_FOUND = "File not found or no file selected.";
+	
 }
