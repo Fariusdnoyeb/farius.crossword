@@ -47,6 +47,7 @@ public class GridFX extends StackPane implements Comparable<GridFX>{
 		rec = new Rectangle(GRID_SIZE, GRID_SIZE, Color.TRANSPARENT);
 		rec.setStrokeType(StrokeType.INSIDE);
 		rec.setStroke(Color.BLACK);
+		
 		label.setText(grid.getContent());
 		if (grid.isBlack()) {
 			Editor.blacken(this);

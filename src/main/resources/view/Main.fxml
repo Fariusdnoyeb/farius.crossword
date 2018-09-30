@@ -36,6 +36,11 @@
                               <KeyCodeCombination alt="UP" code="W" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator>
                         </MenuItem>
+                        <MenuItem fx:id="selectAllGridsMI" mnemonicParsing="false" onAction="#selectAllGrids" text="Select All Grids">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="A" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
                         <MenuItem fx:id="clearBoardMI" onAction="#clearBoard" text="Clear Board" />
                         <MenuItem fx:id="setClueNumberMI" mnemonicParsing="false" onAction="#setClueNumber" text="Set Clue Number...">
                            <accelerator>

@@ -84,11 +84,12 @@ public class BoardFX extends GridPane {
 // ----------------------------Key Event----------------------------
 	private void addKeyHandler() {
 		this.setOnKeyPressed(e -> {
+			String c = e.getText();
+			KeyCode code = e.getCode();
+			
 			if (e.isControlDown() || e.isShiftDown()) {
 				return; //need implementation
 			}
-			String c = e.getText();
-			KeyCode code = e.getCode();
 
 			if (!this.lastFocused[0].isBlack() && (code.isLetterKey() || code.isDigitKey())) {
 				if (!this.multiselectedGrids.isEmpty())

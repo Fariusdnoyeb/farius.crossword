@@ -47,13 +47,13 @@ public class Template implements Serializable{
 	private int rowSize;
 	private int colSize;
 	
-	private ArrayList<Coordinate> clueGrids;
+	private ArrayList<Coordinate> numberedGrids;
 	private ArrayList<Coordinate> blackGrids;
 	
 	public Template(int rowSize, int colSize) {
 		this.rowSize = rowSize;
 		this.colSize = colSize;
-		clueGrids = new ArrayList<Coordinate>();
+		numberedGrids = new ArrayList<Coordinate>();
 		blackGrids = new ArrayList<Coordinate>();
 	}
 	
@@ -69,19 +69,11 @@ public class Template implements Serializable{
 		blackGrids.add(new Coordinate(row, col));
 	}
 
-	public void addClueCoor(int row, int col) {
-		clueGrids.add(new Coordinate(row, col));
+	public void addNumberCoor(int row, int col) {
+		numberedGrids.add(new Coordinate(row, col));
 	}
 	
-//	public EditableBoard generateEditableBoard() {
-//		
-//		EditableBoard board = new EditableBoard(this.rowSize, this.colSize);
-//		
-//		return board;
-//		
-//	}
-	
-	public void loadBlackAndClue(BoardFX boardFX) {
+	public void loadBlackAndNumberedGrids(BoardFX boardFX) {
 		
 		Coordinate coor;
 		
@@ -91,9 +83,9 @@ public class Template implements Serializable{
 			Editor.blacken(boardFX.getGridFX(coor.getRow(), coor.getCol()));
 		}
 		
-		//sets clue grids:
-		for (int i = 0; i < clueGrids.size(); i++) {
-			coor = clueGrids.get(i);
+		//sets numbered grids:
+		for (int i = 0; i < numberedGrids.size(); i++) {
+			coor = numberedGrids.get(i);
 			Editor.setClueNumber(boardFX.getGridFX(coor.getRow(), coor.getCol()),i + 1);
 		}
 		

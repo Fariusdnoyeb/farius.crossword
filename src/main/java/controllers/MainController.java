@@ -40,6 +40,7 @@ public class MainController {
 	@FXML MenuItem exportGameMI;
 	
 	@FXML MenuItem closeTabMI;
+	@FXML MenuItem selectAllGridsMI;
 	@FXML MenuItem clearBoardMI;
 	@FXML MenuItem setClueNumberMI;
 	@FXML MenuItem removeClueNumberMI;
@@ -77,6 +78,7 @@ public class MainController {
 		saveAsTemplateMI.disableProperty().bind(noTab);
 		exportGameMI.disableProperty().bind(noTab);
 		closeTabMI.disableProperty().bind(noTab);
+		selectAllGridsMI.disableProperty().bind(noTab);
 		clearBoardMI.disableProperty().bind(noTab);
 		setClueNumberMI.disableProperty().bind(noTab);
 		removeClueNumberMI.disableProperty().bind(noTab);
@@ -133,6 +135,11 @@ public class MainController {
 	
 	@FXML private void clearBoard() {
 		Editor.clearBoard(selectedTab.getTabContent().getBoardFX());
+	}
+//-----------------------------------------------------------------
+	@FXML private void selectAllGrids() {
+		BoardFX boardFX = selectedTab.getTabContent().getBoardFX();
+		Editor.selectAllGrids(boardFX);
 	}
 //-----------------------------------------------------------------	
 	@FXML private void setClueNumber() throws InterruptedException, ExecutionException {
